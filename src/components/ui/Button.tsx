@@ -1,19 +1,26 @@
+import { motion } from "framer-motion";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "ghost" | "dark";
+type Variant = "primary" | "secondary" | "ghost" | "dark" | "gradient";
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag"
+  > {
   variant?: Variant;
   icon?: ReactNode;
 }
 
 const styles: Record<Variant, string> = {
   primary:
-    "bg-heart text-white shadow-[0_10px_24px_rgb(124_58_237_/_0.35)] hover:brightness-105 active:scale-[0.98]",
+    "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-[0_8px_25px_rgba(124,58,237,0.38)] hover:shadow-[0_12px_30px_rgba(124,58,237,0.5)] border border-white/20",
+  gradient:
+    "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-[0_8px_25px_rgba(236,72,153,0.38)] border border-white/20",
   secondary:
-    "bg-white/80 text-ink border border-blush/70 hover:bg-white active:scale-[0.98]",
-  ghost: "bg-transparent text-ink hover:bg-white/40",
-  dark: "bg-ink text-cream hover:bg-ink/90 active:scale-[0.98]",
+    "bg-white/90 text-ink border border-purple-200/80 hover:border-purple-300 hover:bg-white shadow-sm",
+  ghost: "bg-transparent text-ink hover:bg-white/50",
+  dark: "bg-slate-900 text-purple-100 hover:bg-slate-800 shadow-md border border-slate-700/50",
 };
 
 export function Button({
@@ -22,16 +29,20 @@ export function Button({
   icon,
   children,
   type = "button",
+  disabled,
   ...props
-}: Props) {
+}: ButtonProps) {
   return (
-    <button
+    <motion.button
+      whileHover={disabled ? undefined : { scale: 1.025, y: -1 }}
+      whileTap={disabled ? undefined : { scale: 0.965 }}
       type={type}
-      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${styles[variant]} ${className}`}
-      {...props}
+      disabled={disabled}
+      className={`relative inline-flex min-h-12 items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-5 py-3 text-base font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 select-none ${styles[variant]} ${className}`}
+      {...(props as any)}
     >
-      {icon}
-      {children}
-    </button>
+      {icon && <span className="shrink-0 transition-transform group-hover:scale-110">{icon}</span>}
+      <span>{children}</span>
+    </motion.button>
   );
 }

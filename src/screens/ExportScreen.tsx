@@ -1,15 +1,18 @@
 import { CollagePreview } from "@/components/CollagePreview";
+import { CuteMascot } from "@/components/CuteMascot";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { getFrame } from "@/data/frames";
 import { getLayout } from "@/data/layouts";
 import { track } from "@/lib/analytics";
+import { triggerConfetti } from "@/lib/confetti";
 import { canvasToBlob, fileNameNow, isIOS } from "@/lib/camera";
 import { renderCollage, renderPrintSheet } from "@/lib/render";
 import { useSession } from "@/store/session";
+import { motion } from "framer-motion";
 import { Download, RefreshCw, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function ExportScreen() {
   const session = useSession();
@@ -18,6 +21,10 @@ export function ExportScreen() {
   const [fallbackUrl, setFallbackUrl] = useState("");
   const ios = isIOS();
   const canShare = typeof navigator.share === "function";
+
+  useEffect(() => {
+    triggerConfetti();
+  }, []);
 
   async function makeCanvas(): Promise<HTMLCanvasElement> {
     const layout = getLayout(session.layoutId);
@@ -80,6 +87,7 @@ export function ExportScreen() {
       link.href = url;
       link.download = name;
       link.click();
+      triggerConfetti();
       if (ios) setFallbackUrl(url);
       else window.setTimeout(() => URL.revokeObjectURL(url), 4000);
       track("export_success", { format: session.exportFormat, scale: session.exportScale });
@@ -100,17 +108,17 @@ export function ExportScreen() {
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: "Snapie",
-          text: "Hasil photobooth Snapie",
+          title: "Snapie Photobooth",
+          text: "Hasil foto strip Snapie photobooth online!",
         });
         track("export_success", { format: session.exportFormat, share: true });
         return;
       }
       if (canShare) {
-        await navigator.share({ title: "Snapie", text: "Hasil photobooth Snapie" });
+        await navigator.share({ title: "Snapie Photobooth", text: "Hasil foto strip Snapie online!" });
         return;
       }
-      setError("Berbagi tidak didukung. Unduh saja, lalu kirim dari galeri.");
+      setError("Berbagi tidak didukung browser ini. Unduh saja lalu kirim via galeri HP.");
     } catch (err) {
       if ((err as DOMException).name !== "AbortError") {
         setError("Gagal membagikan. Coba unduh dulu.");
@@ -122,79 +130,111 @@ export function ExportScreen() {
 
   return (
     <Shell
-      title="Pratinjau & unduh"
-      subtitle="Hasil siap dibagikan atau dicetak"
+      title="Pratinjau Akhir & Unduh"
+      subtitle="Foto strip siap diunduh, dibagikan ke IG Story, atau dicetak"
       progress={100}
       onBack={() => session.setStep("customize")}
     >
-      <CollagePreview maxHeight={560} />
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Chip
-          active={session.exportFormat === "png"}
-          onClick={() => session.setExportFormat("png")}
-        >
-          PNG
-        </Chip>
-        <Chip
-          active={session.exportFormat === "jpg"}
-          onClick={() => session.setExportFormat("jpg")}
-        >
-          JPG 92%
-        </Chip>
-        <Chip active={session.exportScale === 1} onClick={() => session.setExportScale(1)}>
-          1× ringan
-        </Chip>
-        <Chip active={session.exportScale === 2} onClick={() => session.setExportScale(2)}>
-          2× HD
-        </Chip>
-        <Chip active={session.print4R} onClick={session.togglePrint4R}>
-          Lembar 4R (2 strip)
-        </Chip>
-        <Chip active={session.watermark} onClick={session.toggleWatermark}>
-          Watermark
-        </Chip>
-      </div>
-      {error ? (
-        <p className="mt-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900">{error}</p>
-      ) : null}
-      {fallbackUrl ? (
-        <div className="mt-3 rounded-2xl bg-white/80 p-3 text-sm">
-          <p className="text-ink-soft">iOS: tekan lama gambar lalu pilih Simpan.</p>
-          <img src={fallbackUrl} alt="Hasil Snapie" className="mt-2 w-full rounded-xl" />
+      <div className="flex flex-col gap-4">
+        {/* Mascot Banner */}
+        <div className="rounded-3xl glass-card p-4">
+          <CuteMascot expression="excited" speech="YAY! Hasil foto strip kamu super gemoy! 🎉" />
         </div>
-      ) : null}
-      <div className="mt-4 grid gap-3">
-        <Button
-          className="w-full"
-          disabled={busy}
-          icon={<Download size={18} />}
-          onClick={() => void download()}
-        >
-          {busy ? "Menyusun…" : "Unduh"}
-        </Button>
-        <Button
-          className="w-full"
-          variant="secondary"
-          disabled={busy}
-          icon={<Share2 size={18} />}
-          onClick={() => void share()}
-        >
-          Bagikan
-        </Button>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant="ghost"
-            icon={<RefreshCw size={16} />}
-            onClick={() => {
-              session.setPhotos([]);
-              session.setStep("layout");
-            }}
+
+        {/* Final Collage Preview */}
+        <div className="relative">
+          <CollagePreview maxHeight={540} />
+        </div>
+
+        {/* Options & Settings */}
+        <div className="rounded-3xl glass-card p-4 space-y-3">
+          <p className="text-xs font-bold text-purple-950">Opsi Format & Cetak:</p>
+          <div className="flex flex-wrap gap-2">
+            <Chip
+              active={session.exportFormat === "png"}
+              onClick={() => session.setExportFormat("png")}
+            >
+              🌟 PNG Jernih
+            </Chip>
+            <Chip
+              active={session.exportFormat === "jpg"}
+              onClick={() => session.setExportFormat("jpg")}
+            >
+              ⚡ JPG (Ringan)
+            </Chip>
+            <Chip active={session.exportScale === 1} onClick={() => session.setExportScale(1)}>
+              📱 1× Standar
+            </Chip>
+            <Chip active={session.exportScale === 2} onClick={() => session.setExportScale(2)}>
+              💎 2× Ultra HD
+            </Chip>
+            <Chip active={session.print4R} onClick={session.togglePrint4R}>
+              🖨️ Format Cetak 4R (2 Strip)
+            </Chip>
+            <Chip active={session.watermark} onClick={session.toggleWatermark}>
+              ✨ Watermark Snapie
+            </Chip>
+          </div>
+        </div>
+
+        {error ? (
+          <p className="rounded-2xl bg-pink-100 p-4 text-xs font-semibold text-pink-950">{error}</p>
+        ) : null}
+
+        {fallbackUrl ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl glass-card p-4 text-xs space-y-2"
           >
-            Foto lagi
+            <p className="font-bold text-purple-950">💡 Khusus pengguna iPhone / iOS Safari:</p>
+            <p className="text-purple-900/70">Tekan dan tahan gambar di bawah ini, lalu pilih <strong>"Simpan ke Foto"</strong>.</p>
+            <img src={fallbackUrl} alt="Hasil Snapie" className="w-full rounded-2xl border border-purple-200 shadow-sm" />
+          </motion.div>
+        ) : null}
+
+        {/* Main Action Buttons */}
+        <div className="flex flex-col gap-3 pt-2">
+          <Button
+            variant="primary"
+            className="w-full py-4 text-lg shadow-lg animate-pulse-glow"
+            disabled={busy}
+            icon={<Download size={22} className="animate-bounce" />}
+            onClick={() => void download()}
+          >
+            {busy ? "Menyusun Gambar..." : "Unduh Foto Strip HD"}
           </Button>
-          <Button variant="dark" onClick={() => session.resetSession()}>
-            Selesai
+
+          <Button
+            variant="secondary"
+            className="w-full py-3.5 text-base"
+            disabled={busy}
+            icon={<Share2 size={20} />}
+            onClick={() => void share()}
+          >
+            Bagikan Foto Strip
           </Button>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Button
+              variant="ghost"
+              className="py-3 text-xs"
+              icon={<RefreshCw size={16} />}
+              onClick={() => {
+                session.setPhotos([]);
+                session.setStep("layout");
+              }}
+            >
+              Foto Lagi
+            </Button>
+            <Button
+              variant="dark"
+              className="py-3 text-xs"
+              onClick={() => session.resetSession()}
+            >
+              Selesai & Reset
+            </Button>
+          </div>
         </div>
       </div>
     </Shell>

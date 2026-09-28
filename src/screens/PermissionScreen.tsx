@@ -1,3 +1,4 @@
+import { CuteMascot } from "@/components/CuteMascot";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/Button";
 import { track } from "@/lib/analytics";
@@ -8,7 +9,8 @@ import {
   stopStream,
 } from "@/lib/camera";
 import { useSession } from "@/store/session";
-import { Camera, ImageUp, Shield } from "lucide-react";
+import { motion } from "framer-motion";
+import { Camera, ImageUp, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
 export function PermissionScreen() {
@@ -43,52 +45,85 @@ export function PermissionScreen() {
 
   return (
     <Shell
-      title="Siapkan kamera"
-      subtitle="Foto tidak pernah meninggalkan HP-mu"
+      title="Izin Kamera"
+      subtitle="Foto diproses lokal di HP-mu tanpa diunggah"
       progress={15}
       onBack={() => setStep("landing")}
     >
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-5 py-2">
         {inApp ? (
-          <div className="rounded-2xl bg-amber-100 px-4 py-3 text-sm text-amber-950">
-            Browser dalam aplikasi (IG/TikTok) sering memblokir kamera. Buka
-            tautan ini di Chrome atau Safari untuk hasil terbaik.
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-amber-300/80 bg-amber-500/10 p-4 text-xs leading-relaxed text-amber-950 backdrop-blur-md"
+          >
+            ⚠️ <strong>Perhatian:</strong> Kamu membuka Snapie via browser internal (Instagram / TikTok). Jika kamera tidak muncul, ketuk titik 3 di kanan atas lalu pilih <strong>"Buka di Chrome / Safari"</strong>.
+          </motion.div>
         ) : null}
 
-        <div className="rounded-3xl bg-white/80 p-5 shadow-sm">
-          <div className="grid size-14 place-items-center rounded-2xl bg-blush/60 text-heart">
-            <Shield />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-3xl glass-card p-6 shadow-md"
+        >
+          <div className="flex items-center gap-4">
+            <CuteMascot expression="camera" />
+            <div>
+              <h2 className="font-display text-2xl font-bold text-purple-950">Siapkan Kamera</h2>
+              <p className="mt-1 text-xs text-purple-900/70">
+                Izinkan akses kamera untuk memulai foto strip otomatis.
+              </p>
+            </div>
           </div>
-          <h2 className="mt-4 font-display text-2xl">Kenapa perlu kamera?</h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            Snapie memakai kamera perangkatmu untuk sesi photobooth. Pratinjau
-            dan hasil kolase diproses di browser. Tidak ada akun, tidak ada
-            unggahan ke server.
-          </p>
-        </div>
+
+          <div className="mt-6 space-y-3 border-t border-purple-100 pt-4 text-xs text-purple-900/80">
+            <div className="flex items-start gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-100 font-bold text-violet-700">✓</span>
+              <p><strong>Privasi Dijamin:</strong> Foto tidak pernah dikirim atau disimpan di server mana pun.</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-pink-100 font-bold text-pink-700">✓</span>
+              <p><strong>Bisa Ganti Kamera:</strong> Bisa pakai kamera depan atau belakang sesuai selera.</p>
+            </div>
+          </div>
+        </motion.div>
 
         {error || cameraDenied ? (
-          <div className="rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900">
-            <p>{error || "Izin kamera belum diberikan."}</p>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs">
-              <li>Chrome: ikon gembok di bilah alamat → Izinkan kamera.</li>
-              <li>Safari: Pengaturan → Safari → Kamera → Izinkan.</li>
-              <li>Atau unggah foto dari galeri sebagai alternatif.</li>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl border border-pink-300/80 bg-pink-500/10 p-5 text-xs text-pink-950 shadow-sm"
+          >
+            <div className="flex items-center gap-2 font-bold text-pink-900 text-sm">
+              <ShieldAlert size={18} />
+              <span>{error || "Izin kamera belum diberikan."}</span>
+            </div>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-purple-950/80">
+              <li>Chrome: Ketuk ikon gembok 🔒 di URL &rarr; Izin Kamera &rarr; Izinkan.</li>
+              <li>Safari: Pengaturan HP &rarr; Safari &rarr; Kamera &rarr; Izinkan.</li>
+              <li>Atau gunakan opsi <strong>Unggah dari Galeri</strong> di bawah ini!</li>
             </ul>
-          </div>
+          </motion.div>
         ) : null}
 
-        <div className="mt-auto grid gap-3">
+        <div className="mt-auto flex flex-col gap-3 pt-4">
           <Button
+            variant="primary"
+            className="py-3.5 text-base"
             onClick={() => void allowCamera()}
             disabled={busy}
-            icon={<Camera size={18} />}
+            icon={<Camera size={20} />}
           >
-            {busy ? "Meminta izin…" : "Izinkan Kamera"}
+            {busy ? "Meminta izin kamera…" : "Izinkan & Buka Kamera"}
           </Button>
-          <Button variant="secondary" onClick={useUpload} icon={<ImageUp size={18} />}>
-            Unggah dari Galeri
+
+          <Button
+            variant="secondary"
+            className="py-3.5 text-base"
+            onClick={useUpload}
+            icon={<ImageUp size={20} />}
+          >
+            Pilih Foto dari Galeri
           </Button>
         </div>
       </div>

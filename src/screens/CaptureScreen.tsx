@@ -1,9 +1,11 @@
+import { CuteMascot } from "@/components/CuteMascot";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { getLayout } from "@/data/layouts";
 import { track } from "@/lib/analytics";
 import { playShutter, playTick } from "@/lib/audio";
+import { triggerConfetti } from "@/lib/confetti";
 import {
   cameraErrorMessage,
   captureFromVideo,
@@ -12,8 +14,28 @@ import {
   stopStream,
 } from "@/lib/camera";
 import { useSession } from "@/store/session";
-import { Camera, ImageUp, RefreshCw, SwitchCamera, Volume2, VolumeX } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Camera,
+  ImageUp,
+  RefreshCw,
+  SwitchCamera,
+  Volume2,
+  VolumeX,
+  ArrowRight
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const POSE_SUGGESTIONS = [
+  "Senyum manis! 😊",
+  "Pose Duckface gemoy! 😙",
+  "Double Peace sign! ✌️✨",
+  "Gaya Heart Hand! 🫶",
+  "Wink mata kece! 😉",
+  "Pose Kaget Lucu! 😲",
+  "Kirim ciuman udara! 💋",
+  "Pose Senyum Lebar! 😄",
+];
 
 export function CaptureScreen() {
   const {
@@ -44,6 +66,7 @@ export function CaptureScreen() {
   const [count, setCount] = useState<number | null>(null);
   const [flash, setFlash] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [poseIndex, setPoseIndex] = useState(0);
   const running = useRef(false);
 
   const taken = photos.length;
@@ -97,7 +120,7 @@ export function CaptureScreen() {
     if (!video) return false;
     if (soundEnabled) playShutter();
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 160);
+    window.setTimeout(() => setFlash(false), 180);
     const shot = await captureFromVideo(video, mirrored);
     const photo = {
       id: crypto.randomUUID(),
@@ -119,10 +142,12 @@ export function CaptureScreen() {
     const latest = useSession.getState().photos;
     if (latest.length >= needed) {
       track("capture_completed", { count: latest.length });
+      triggerConfetti();
       stopCam();
       setStep("review");
       return true;
     }
+    setPoseIndex((prev) => (prev + 1) % POSE_SUGGESTIONS.length);
     return false;
   }
 
@@ -145,7 +170,7 @@ export function CaptureScreen() {
       for (let i = 0; i < times; i += 1) {
         const done = await runCountdownThenSnap();
         if (done) break;
-        await wait(350);
+        await wait(400);
       }
     } finally {
       running.current = false;
@@ -183,6 +208,7 @@ export function CaptureScreen() {
       const total = useSession.getState().photos;
       if (total.length >= needed) {
         track("capture_completed", { count: total.length, source: "upload" });
+        triggerConfetti();
         setStep("review");
       }
     } catch {
@@ -199,51 +225,52 @@ export function CaptureScreen() {
   if (source === "upload") {
     return (
       <Shell
-        title="Unggah foto"
-        subtitle={`Pilih ${needed} foto untuk ${layout.name}`}
+        title="Unggah Foto dari Galeri"
+        subtitle={`Pilih ${needed} foto pilihanmu untuk ${layout.name}`}
         progress={45}
         onBack={() => setStep("layout")}
       >
-        <label className="flex flex-1 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-blush bg-white/70 p-6 text-center">
-          <ImageUp className="text-heart" size={36} />
-          <p className="mt-3 font-display text-xl">Pilih dari galeri</p>
-          <p className="mt-1 text-sm text-ink-soft">
-            Bisa pilih banyak sekaligus. Kami memakai {needed} foto pertama.
-          </p>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="sr-only"
-            onChange={(event) => void onUpload(event.target.files)}
-          />
-        </label>
-        {photos.length > 0 && photos.length < needed ? (
-          <p className="mt-3 text-center text-sm text-ink-soft">
-            {photos.length} dari {needed} foto. Tambah lagi ya.
-          </p>
-        ) : null}
-        {error ? (
-          <p className="mt-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900">{error}</p>
-        ) : null}
-        <Button
-          className="mt-4"
-          variant="secondary"
-          onClick={() => {
-            setSource("camera");
-            setError("");
-          }}
-        >
-          Gunakan kamera saja
-        </Button>
+        <div className="flex flex-1 flex-col gap-4 py-2">
+          <label className="flex flex-1 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-purple-300 bg-white/80 p-8 text-center shadow-sm hover:bg-white transition-all">
+            <ImageUp className="text-purple-600 animate-bounce" size={44} />
+            <p className="mt-4 font-display text-xl font-bold text-purple-950">Pilih dari Galeri HP / Komputer</p>
+            <p className="mt-1 max-w-sm text-xs leading-relaxed text-purple-900/70">
+              Kamu bisa memilih beberapa foto sekaligus. Kami akan mengambil <strong>{needed} foto pertama</strong>.
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="sr-only"
+              onChange={(event) => void onUpload(event.target.files)}
+            />
+          </label>
+          {photos.length > 0 && photos.length < needed ? (
+            <p className="text-center text-xs font-semibold text-purple-900/80">
+              Sudah terpilih {photos.length} dari {needed} foto. Silakan tambah foto lagi.
+            </p>
+          ) : null}
+          {error ? (
+            <p className="rounded-2xl bg-pink-100 p-3.5 text-xs text-pink-900 font-medium">{error}</p>
+          ) : null}
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSource("camera");
+              setError("");
+            }}
+          >
+            Buka Kamera Saja
+          </Button>
+        </div>
       </Shell>
     );
   }
 
   return (
     <Shell
-      title={retakeIndex !== null ? "Ulangi foto" : "Sesi foto"}
-      subtitle={`Foto ${currentSlot} dari ${needed} · landscape 4:3`}
+      title={retakeIndex !== null ? "Ulangi Jepretan" : "Sesi Photobooth"}
+      subtitle={`Foto ke-${currentSlot} dari ${needed} · 4:3 Ratio`}
       progress={45}
       wide
       onBack={() => {
@@ -251,105 +278,196 @@ export function CaptureScreen() {
         setStep("layout");
       }}
     >
-      <div className="flex flex-1 flex-col gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-8">
-        <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-black shadow-lg lg:mx-0 lg:max-w-[420px] lg:shrink-0">
+      <div className="flex flex-1 flex-col gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-8">
+        {/* Camera Viewfinder */}
+        <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-slate-950 shadow-xl border-4 border-white/60 lg:mx-0 lg:max-w-[440px] lg:shrink-0">
           <video
             ref={videoRef}
             playsInline
             muted
             className={`aspect-[4/3] h-full w-full object-cover ${mirrored ? "-scale-x-100" : ""}`}
           />
-          {flash ? <div className="absolute inset-0 bg-white/90" /> : null}
-          {count !== null ? (
-            <div className="absolute inset-0 grid place-items-center bg-black/25">
-              <p className="font-display text-7xl text-white drop-shadow-lg lg:text-6xl">{count}</p>
+
+          {/* Cute Viewfinder Corner Overlays */}
+          <div className="pointer-events-none absolute inset-4 border border-white/20 rounded-2xl flex flex-col justify-between p-3 select-none">
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1.5 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-xs">
+                <span className="size-2 rounded-full bg-red-500 animate-ping" /> LIVE
+              </span>
+              <span className="rounded-full bg-violet-600/90 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-xs">
+                {currentSlot} / {needed} 📸
+              </span>
             </div>
-          ) : null}
+
+            {/* Pose suggestion ticker */}
+            <div className="text-center">
+              <motion.span
+                key={poseIndex}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block rounded-full bg-purple-950/70 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-purple-200 border border-white/20 shadow-xs"
+              >
+                Ide Pose: {POSE_SUGGESTIONS[poseIndex]}
+              </motion.span>
+            </div>
+          </div>
+
+          {/* Shutter Flash */}
+          {flash ? <div className="absolute inset-0 bg-white z-40 transition-opacity" /> : null}
+
+          {/* Big Animated Countdown */}
+          <AnimatePresence>
+            {count !== null && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.5 }}
+                key={count}
+                className="absolute inset-0 z-30 grid place-items-center bg-purple-950/30 backdrop-blur-xs select-none"
+              >
+                <div className="flex flex-col items-center">
+                  <span className="font-display text-8xl font-black text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)]">
+                    {count}
+                  </span>
+                  <span className="mt-2 text-sm font-bold text-pink-300 drop-shadow-md">
+                    SENYUM DULU YA! ✨
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {!ready && !error ? (
-            <div className="absolute inset-0 grid place-items-center text-sm text-white">
-              Menyalakan kamera…
+            <div className="absolute inset-0 z-20 grid place-items-center bg-slate-900 text-xs font-bold text-purple-200">
+              <div className="flex flex-col items-center gap-2">
+                <span className="animate-spin text-2xl">📸</span>
+                <span>Menyalakan kamera...</span>
+              </div>
             </div>
           ) : null}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col lg:max-w-sm lg:pt-1">
+        {/* Controls & Options Panel */}
+        <div className="flex min-w-0 flex-1 flex-col lg:max-w-md">
           {error ? (
-            <div className="mb-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm text-violet-900">
-              {error}
-              <div className="mt-2 flex gap-2">
-                <Button variant="secondary" onClick={() => void startCam()}>
+            <div className="mb-4 rounded-3xl bg-pink-100 p-4 text-xs text-pink-900 border border-pink-200">
+              <p className="font-bold text-sm">{error}</p>
+              <div className="mt-3 flex gap-2">
+                <Button variant="secondary" className="py-2 text-xs" onClick={() => void startCam()}>
                   Coba lagi
                 </Button>
-                <Button variant="ghost" onClick={() => setSource("upload")}>
+                <Button variant="ghost" className="py-2 text-xs" onClick={() => setSource("upload")}>
                   Unggah foto
                 </Button>
               </div>
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-2">
-            {([3, 5, 10] as const).map((value) => (
-              <Chip key={value} active={countdownSeconds === value} onClick={() => setCountdown(value)}>
-                {value} dtk
-              </Chip>
-            ))}
-            <Chip active={captureMode === "auto"} onClick={() => setCaptureMode("auto")}>
-              Otomatis
-            </Chip>
-            <Chip active={captureMode === "manual"} onClick={() => setCaptureMode("manual")}>
-              Manual
-            </Chip>
+          {/* Mascot Info */}
+          <div className="mb-4 rounded-3xl glass-card p-4">
+            <CuteMascot
+              expression={busy ? "excited" : "happy"}
+              speech={
+                busy
+                  ? "Tahan pose! Mengambil foto... 📸"
+                  : retakeIndex !== null
+                  ? "Ulangi foto ini ya!"
+                  : `Foto ke-${currentSlot} siap dijepret!`
+              }
+            />
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-3 lg:justify-start">
-            <button
+          {/* Countdown & Mode Selectors */}
+          <div className="rounded-3xl glass-card p-4 space-y-3">
+            <div>
+              <p className="text-xs font-bold text-purple-900/70 mb-2">Timer Hitung Mundur:</p>
+              <div className="flex flex-wrap gap-2">
+                {([3, 5, 10] as const).map((value) => (
+                  <Chip key={value} active={countdownSeconds === value} onClick={() => setCountdown(value)}>
+                    ⏱️ {value} dtk
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-purple-900/70 mb-2">Mode Jepretan:</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip active={captureMode === "auto"} onClick={() => setCaptureMode("auto")}>
+                  ⚡ Otomatis Seri
+                </Chip>
+                <Chip active={captureMode === "manual"} onClick={() => setCaptureMode("manual")}>
+                  👆 Manual Satuan
+                </Chip>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Button Strip */}
+          <div className="mt-5 flex items-center justify-between gap-3">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               type="button"
-              className="grid size-12 place-items-center rounded-full bg-white/80"
+              className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/90 text-purple-950 shadow-sm border border-purple-100"
               onClick={toggleSound}
-              aria-label={soundEnabled ? "Matikan suara" : "Nyalakan suara"}
+              aria-label={soundEnabled ? "Matikan Suara" : "Nyalakan Suara"}
             >
-              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
-            </button>
+              {soundEnabled ? <Volume2 size={20} className="text-purple-700" /> : <VolumeX size={20} className="text-purple-400" />}
+            </motion.button>
+
             {captureMode === "manual" && remaining > 0 ? (
               <Button
-                className="size-16 rounded-full px-0 lg:size-14"
+                variant="primary"
+                className="flex-1 py-4 text-base shadow-md"
                 disabled={!ready || busy}
                 onClick={() => void runCountdownThenSnap()}
-                icon={<Camera size={24} />}
-                aria-label="Jepret"
-              />
+                icon={<Camera size={22} />}
+              >
+                {busy ? "Mengambil..." : "Jepret Foto"}
+              </Button>
             ) : remaining <= 0 && retakeIndex === null ? (
               <Button
+                variant="primary"
+                className="flex-1 py-4 text-base"
                 onClick={() => {
                   stopCam();
                   setStep("review");
                 }}
+                icon={<ArrowRight size={20} />}
               >
-                Lanjut review
+                Lanjut Review Foto
               </Button>
             ) : (
               <Button
+                variant="primary"
+                className="flex-1 py-4 text-base"
                 disabled={!ready || busy}
                 onClick={() => void startAutoSession()}
+                icon={<Camera size={22} />}
               >
-                {busy ? "Mengambil…" : retakeIndex !== null ? "Ulangi" : "Mulai sesi"}
+                {busy ? "Sesi Berjalan..." : retakeIndex !== null ? "Ulangi Jepretan Ini" : "Mulai Sesi Foto"}
               </Button>
             )}
-            <button
+
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               type="button"
-              className="grid size-12 place-items-center rounded-full bg-white/80"
+              className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/90 text-purple-950 shadow-sm border border-purple-100"
               onClick={flip}
-              aria-label="Ganti kamera"
+              aria-label="Ganti Kamera"
             >
-              <SwitchCamera size={18} />
-            </button>
+              <SwitchCamera size={20} className="text-purple-700" />
+            </motion.button>
           </div>
+
           <button
             type="button"
-            className="mt-3 inline-flex items-center justify-center gap-2 text-sm text-ink-soft lg:justify-start"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-purple-800/70 hover:text-purple-900"
             onClick={() => setSource("upload")}
           >
-            <RefreshCw size={14} /> atau unggah dari galeri
+            <RefreshCw size={14} /> Pilih foto dari galeri HP sebagai gantinya
           </button>
         </div>
       </div>
