@@ -1,6 +1,6 @@
-import { getFilterCss } from "@/data/filters";
+import { applyPhotoFilter } from "@/lib/colorFilter";
 import type { FilterId, FrameStyle, Layout, Photo, PlacedSticker } from "@/types";
-import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { drawDecorations, drawSlotOrnaments, pathRoundedRect, roundedRect } from "@/lib/decorations";
 
 const imageCache = new Map<string, HTMLImageElement>();
 
@@ -17,7 +17,7 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
 
 export function drawCover(
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
+  img: HTMLImageElement | HTMLCanvasElement,
   dx: number,
   dy: number,
   dw: number,
@@ -26,8 +26,8 @@ export function drawCover(
   focalY: number,
   zoom: number,
 ): void {
-  const imgW = img.naturalWidth || img.width;
-  const imgH = img.naturalHeight || img.height;
+  const imgW = img instanceof HTMLCanvasElement ? img.width : img.naturalWidth || img.width;
+  const imgH = img instanceof HTMLCanvasElement ? img.height : img.naturalHeight || img.height;
   const safeZoom = Math.max(1, zoom);
   const scale = Math.max(dw / imgW, dh / imgH) * safeZoom;
   let sw = dw / scale;
@@ -52,6 +52,7 @@ export interface RenderOptions {
   showDate: boolean;
   watermark: boolean;
   scale: number;
+  includeStickers?: boolean;
 }
 
 export async function renderCollage(
@@ -68,6 +69,7 @@ export async function renderCollage(
     showDate,
     watermark,
     scale,
+    includeStickers = true,
   } = options;
   const width = Math.round(layout.canvas.width * scale);
   const height = Math.round(layout.canvas.height * scale);
@@ -81,14 +83,32 @@ export async function renderCollage(
   ctx.fillStyle = background || frame.bg;
   ctx.fillRect(0, 0, layout.canvas.width, layout.canvas.height);
 
-  ctx.filter = getFilterCss(filter);
   const loaded = await Promise.all(
     photos.map((photo) => loadImage(photo.src).catch(() => null)),
   );
+  const filtered = loaded.map((img) =>
+    img ? applyPhotoFilter(img, filter) : null,
+  );
 
   layout.slots.forEach((slot, index) => {
-    const img = loaded[index];
+    const img = filtered[index];
     const photo = photos[index];
+    ctx.save();
+    ctx.shadowColor = "rgba(42, 24, 72, 0.18)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    roundedRect(
+      ctx,
+      slot.x - 7,
+      slot.y - 7,
+      slot.w + 14,
+      slot.h + 14,
+      slot.radius + 8,
+    );
+    ctx.fillStyle = frame.mat || "#ffffff";
+    ctx.fill();
+    ctx.restore();
+
     ctx.save();
     roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
     ctx.clip();
@@ -109,13 +129,12 @@ export async function renderCollage(
     }
     ctx.restore();
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.35)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.45)";
+    ctx.lineWidth = 2.5;
     roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
     ctx.stroke();
     ctx.restore();
   });
-  ctx.filter = "none";
 
   if (filter === "glow") {
     ctx.save();
@@ -152,6 +171,8 @@ export async function renderCollage(
   );
   ctx.restore();
 
+  drawSlotOrnaments(ctx, frame.decoration, layout.slots, frame.accent);
+
   const area = layout.captionArea;
   if (area.h > 0) {
     const dateText = showDate ? formatCaptionDate(new Date()) : "";
@@ -160,7 +181,7 @@ export async function renderCollage(
       ctx.fillStyle = frame.captionColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const script = /romantic|letter|heart|lace|rose|sunset/i.test(
+      const script = /romantic|letter|heart|lace|rose|sunset|cats-/i.test(
         frame.decoration,
       );
       ctx.font = script
@@ -176,19 +197,21 @@ export async function renderCollage(
     }
   }
 
-  stickers.forEach((sticker) => {
-    ctx.save();
-    ctx.translate(
-      sticker.x * layout.canvas.width,
-      sticker.y * layout.canvas.height,
-    );
-    ctx.rotate((sticker.rotation * Math.PI) / 180);
-    ctx.font = `${Math.round(64 * sticker.scale)}px serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(sticker.emoji, 0, 0);
-    ctx.restore();
-  });
+  if (includeStickers) {
+    stickers.forEach((sticker) => {
+      ctx.save();
+      ctx.translate(
+        sticker.x * layout.canvas.width,
+        sticker.y * layout.canvas.height,
+      );
+      ctx.rotate((sticker.rotation * Math.PI) / 180);
+      ctx.font = `${Math.round(64 * sticker.scale)}px serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(sticker.emoji, 0, 0);
+      ctx.restore();
+    });
+  }
 
   if (watermark) {
     ctx.save();

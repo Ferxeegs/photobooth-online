@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
-const themes: ThemeId[] = ["cute", "romantic", "cool"];
+const themes: ThemeId[] = ["cute", "cat", "romantic", "cool"];
 
 export function FrameScreen() {
   const { frameId, setFrame, background, setBackground, setStep } = useSession();
@@ -20,6 +20,7 @@ export function FrameScreen() {
   const [theme, setTheme] = useState<ThemeId>(current?.theme ?? "cute");
   if (!current) return null;
   const visible = frames.filter((item) => item.theme === theme);
+  const darkUi = theme === "cool" || current.id === "moon-neko";
 
   return (
     <Shell
@@ -27,7 +28,7 @@ export function FrameScreen() {
       subtitle="Bingkai akan disesuaikan dengan foto aslimu secara langsung"
       progress={75}
       onBack={() => setStep("review")}
-      dark={theme === "cool"}
+      dark={darkUi}
       footer={
         <Button
           className="w-full py-3.5 text-base"
@@ -48,7 +49,7 @@ export function FrameScreen() {
         </div>
 
         {/* Mascot Advice */}
-        <div className={`rounded-3xl p-4 ${theme === "cool" ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
+        <div className={`rounded-3xl p-4 ${darkUi ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
           <CuteMascot expression="excited" speech={`Bingkai ${current.name} pas banget!`} />
         </div>
 
@@ -56,7 +57,7 @@ export function FrameScreen() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
           {themes.map((id) => (
             <Chip key={id} active={theme === id} onClick={() => setTheme(id)}>
-              {id === "cute" ? "🧸" : id === "romantic" ? "💕" : "😎"} {themeLabels[id]}
+              {id === "cute" ? "🧸" : id === "cat" ? "🐱" : id === "romantic" ? "💕" : "😎"} {themeLabels[id]}
             </Chip>
           ))}
         </div>
@@ -77,7 +78,7 @@ export function FrameScreen() {
         </div>
 
         {/* Color Palette Switcher */}
-        <div className={`rounded-3xl p-4 space-y-2.5 ${theme === "cool" ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
+        <div className={`rounded-3xl p-4 space-y-2.5 ${darkUi ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
           <p className="text-xs font-bold tracking-wide">🎨 Ubah Warna Latar Bingkai:</p>
           <div className="flex flex-wrap gap-2.5">
             {(bgPalettes[theme] ?? []).concat(current.palette).filter(unique).map((color) => (

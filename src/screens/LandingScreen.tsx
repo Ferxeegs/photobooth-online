@@ -1,6 +1,7 @@
 import { CuteMascot } from "@/components/CuteMascot";
 import { FloatingParticles } from "@/components/FloatingParticles";
 import { Button } from "@/components/ui/Button";
+import { frames } from "@/data/frames";
 import { layouts } from "@/data/layouts";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/store/session";
@@ -196,7 +197,7 @@ export function LandingScreen() {
             <span>Diproses 100% di browser-mu · Bebas Iklan · Tanpa Server Upload</span>
           </p>
           <p className="mt-2 text-xs text-purple-700/50">
-            {layouts.length} pilihan layout · 15+ tema bingkai cute · Siap dipamerkan di Story! ✨
+            {layouts.length} pilihan layout · {frames.length} bingkai lucu, kucing, romantis & keren ✨
           </p>
         </footer>
       </div>

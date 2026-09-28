@@ -49,7 +49,7 @@ export function CustomizeScreen() {
         <div className="relative">
           <CollagePreview interactive />
           <p className="mt-2 text-center text-[11px] font-semibold text-purple-900/60">
-            👉 Ketuk stiker untuk menambah, lalu <strong>geser langsung di gambar</strong> untuk mengatur posisinya!
+            👉 Ketuk emoji di bawah, lalu <strong>tahan dan geser stiker di foto</strong> — area sentuhnya sudah diperbesar.
           </p>
         </div>
 
@@ -122,8 +122,8 @@ export function CustomizeScreen() {
                     addSticker({
                       id: crypto.randomUUID(),
                       emoji,
-                      x: 0.5,
-                      y: 0.5,
+                    x: 0.35 + Math.random() * 0.3,
+                    y: 0.3 + Math.random() * 0.4,
                       scale: 1,
                       rotation: 0,
                     })

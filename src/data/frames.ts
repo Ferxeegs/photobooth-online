@@ -9,6 +9,7 @@ export const frames: FrameStyle[] = [
     palette: ["#FFE4F0", "#FFD6E8", "#FFF3C7", "#D6F0FF", "#E8D5FF"],
     captionColor: "#7A4060",
     accent: "#FF7AA2",
+    mat: "#FFF8FB",
     decoration: "bears",
   },
   {
@@ -19,6 +20,7 @@ export const frames: FrameStyle[] = [
     palette: ["#E8F6FF", "#FFE8F4", "#FFF6C7", "#E4FFE8", "#F3E8FF"],
     captionColor: "#4A6A8A",
     accent: "#7EC8E3",
+    mat: "#FFFFFF",
     decoration: "clouds",
   },
   {
@@ -29,6 +31,7 @@ export const frames: FrameStyle[] = [
     palette: ["#1A1024", "#2D1B3D", "#0F2027", "#1B2838", "#2A1030"],
     captionColor: "#FFE37A",
     accent: "#FF6B9D",
+    mat: "#2A1A38",
     decoration: "pixels",
   },
   {
@@ -39,6 +42,7 @@ export const frames: FrameStyle[] = [
     palette: ["#FFF0F3", "#FFE4EC", "#FFF7E0", "#FDE2FF", "#FFE8D6"],
     captionColor: "#C23B5A",
     accent: "#FF6B8A",
+    mat: "#FFFFFF",
     decoration: "strawberry",
   },
   {
@@ -49,7 +53,52 @@ export const frames: FrameStyle[] = [
     palette: ["#FFF4C8", "#FFD6A5", "#C8F4FF", "#E8FFC8", "#FFD0E8"],
     captionColor: "#5A3A1A",
     accent: "#FF8A3D",
+    mat: "#FFFBEA",
     decoration: "cartoon",
+  },
+  {
+    id: "kitty-cafe",
+    name: "Kitty Cafe",
+    theme: "cat",
+    bg: "#FFF3E8",
+    palette: ["#FFF3E8", "#FFE4D6", "#FDE8C8", "#F5F0FF", "#FFFFFF"],
+    captionColor: "#8A4A28",
+    accent: "#E89A4A",
+    mat: "#FFFBF6",
+    decoration: "cats-cafe",
+  },
+  {
+    id: "calico-ribbon",
+    name: "Calico Ribbon",
+    theme: "cat",
+    bg: "#FFE8F0",
+    palette: ["#FFE8F0", "#FFF0F5", "#FFE4C8", "#E8D5FF", "#FFFFFF"],
+    captionColor: "#9A4060",
+    accent: "#F472B6",
+    mat: "#FFFFFF",
+    decoration: "cats-calico",
+  },
+  {
+    id: "moon-neko",
+    name: "Moon Neko",
+    theme: "cat",
+    bg: "#2A1848",
+    palette: ["#2A1848", "#1E1035", "#3B0764", "#0F172A", "#4C1D95"],
+    captionColor: "#F5F3FF",
+    accent: "#C4B5FD",
+    mat: "#1A1028",
+    decoration: "cats-moon",
+  },
+  {
+    id: "paw-party",
+    name: "Paw Party",
+    theme: "cat",
+    bg: "#F5F0FF",
+    palette: ["#F5F0FF", "#EDE9FE", "#DDD6FE", "#FFF1F5", "#FFFFFF"],
+    captionColor: "#5B21B6",
+    accent: "#7C3AED",
+    mat: "#FFFFFF",
+    decoration: "cats-paws",
   },
   {
     id: "rose-garden",
@@ -59,6 +108,7 @@ export const frames: FrameStyle[] = [
     palette: ["#F8E8EE", "#F3D1DC", "#FBE8D0", "#EAD7F0", "#F6EFE6"],
     captionColor: "#7A3048",
     accent: "#C45C78",
+    mat: "#FFF8FA",
     decoration: "roses",
   },
   {
@@ -69,6 +119,7 @@ export const frames: FrameStyle[] = [
     palette: ["#F6ECD9", "#EFE0C4", "#F8E6EA", "#E8DCC8", "#FFF6E8"],
     captionColor: "#6B3E2E",
     accent: "#C9A227",
+    mat: "#FFFBF3",
     decoration: "letter",
   },
   {
@@ -79,6 +130,7 @@ export const frames: FrameStyle[] = [
     palette: ["#FFE4EC", "#FFD0DC", "#FFF0F5", "#F8D0E8", "#FFE8F0"],
     captionColor: "#B31B4A",
     accent: "#FF5C7A",
+    mat: "#FFFFFF",
     decoration: "hearts",
   },
   {
@@ -89,6 +141,7 @@ export const frames: FrameStyle[] = [
     palette: ["#F7F1EA", "#EEE4D8", "#F8E8F0", "#E8EEF4", "#FFF8F0"],
     captionColor: "#6A4A58",
     accent: "#D4AF37",
+    mat: "#FFFEFA",
     decoration: "lace",
   },
   {
@@ -99,6 +152,7 @@ export const frames: FrameStyle[] = [
     palette: ["#F7C9A8", "#F4A88A", "#E8B4C8", "#FFD6A5", "#C9A0DC"],
     captionColor: "#5A2040",
     accent: "#E85D4C",
+    mat: "#FFF4EC",
     decoration: "sunset",
   },
   {
@@ -109,6 +163,7 @@ export const frames: FrameStyle[] = [
     palette: ["#0B0714", "#12081F", "#071018", "#14081C", "#000000"],
     captionColor: "#F8F0FF",
     accent: "#FF2E97",
+    mat: "#160C22",
     decoration: "neon",
   },
   {
@@ -119,6 +174,7 @@ export const frames: FrameStyle[] = [
     palette: ["#111111", "#1A1A1A", "#0A0A0A", "#222222", "#000000"],
     captionColor: "#F2F2F2",
     accent: "#FFFFFF",
+    mat: "#1A1A1A",
     decoration: "noir",
   },
   {
@@ -129,6 +185,7 @@ export const frames: FrameStyle[] = [
     palette: ["#D9DEE8", "#C5CCD8", "#E8E0F0", "#C8D8E8", "#B8C0CC"],
     captionColor: "#1A2030",
     accent: "#7A8BFF",
+    mat: "#F4F6FA",
     decoration: "chrome",
   },
   {
@@ -139,6 +196,7 @@ export const frames: FrameStyle[] = [
     palette: ["#F4F0E6", "#111111", "#FF3B5C", "#2BD9FF", "#C8FF3B"],
     captionColor: "#111111",
     accent: "#FF3B5C",
+    mat: "#FFFFFF",
     decoration: "street",
   },
   {
@@ -149,12 +207,14 @@ export const frames: FrameStyle[] = [
     palette: ["#E8DCC8", "#D9C8A8", "#C4B49A", "#F0E6D2", "#B8A888"],
     captionColor: "#3A2A18",
     accent: "#8B5A2B",
+    mat: "#F4ECD8",
     decoration: "vintage",
   },
 ];
 
 export const bgPalettes: Record<string, string[]> = {
   cute: ["#EDE9FE", "#DDD6FE", "#C4B5FD", "#A78BFA", "#F5F3FF", "#FFFFFF"],
+  cat: ["#FFF3E8", "#FFE8F0", "#F5F0FF", "#2A1848", "#FFFFFF", "#FFFBEA"],
   romantic: ["#F8E8EE", "#F6ECD9", "#FFE4EC", "#F7F1EA", "#F7C9A8", "#FFFFFF"],
   cool: ["#0B0714", "#111111", "#D9DEE8", "#F4F0E6", "#E8DCC8", "#1A2030"],
 };
@@ -167,6 +227,7 @@ export function getFrame(id: string): FrameStyle {
 
 export const themeLabels: Record<FrameStyle["theme"], string> = {
   cute: "Lucu",
+  cat: "Kucing",
   romantic: "Romantis",
   cool: "Keren",
 };

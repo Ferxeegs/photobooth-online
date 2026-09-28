@@ -1,4 +1,4 @@
-export type ThemeId = "cute" | "romantic" | "cool";
+export type ThemeId = "cute" | "romantic" | "cool" | "cat";
 export type CaptureMode = "auto" | "manual";
 export type FacingMode = "user" | "environment";
 export type PhotoSource = "camera" | "upload";
@@ -75,6 +75,7 @@ export interface FrameStyle {
   palette: string[];
   captionColor: string;
   accent: string;
+  mat: string;
   decoration: DecorationKind;
 }
 
@@ -93,4 +94,8 @@ export type DecorationKind =
   | "noir"
   | "chrome"
   | "street"
-  | "vintage";
+  | "vintage"
+  | "cats-cafe"
+  | "cats-calico"
+  | "cats-moon"
+  | "cats-paws";

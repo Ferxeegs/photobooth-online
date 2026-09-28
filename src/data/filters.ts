@@ -34,5 +34,6 @@ export function getFilterCss(id: FilterId): string {
 export const stickerCatalog = [
   "💖", "✨", "⭐", "🎀", "🧸", "🐰", "🌸", "🍓",
   "❤️", "💌", "🦋", "☁️", "🌙", "🧁", "🌷", "🍒",
+  "🐱", "😺", "😸", "😻", "🐾", "🐟", "🧶", "🍼",
   "😎", "🔥", "💫", "🎶", "📸", "🥰", "🥂", "🎉",
 ] as const;
