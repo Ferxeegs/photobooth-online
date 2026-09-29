@@ -1,6 +1,11 @@
 import { getFrame } from "@/data/frames";
 import { getLayout } from "@/data/layouts";
-import { drawStickers, renderCollage, STICKER_BASE_SIZE } from "@/lib/render";
+import {
+  drawStickers,
+  preloadPlacedStickers,
+  renderCollage,
+  STICKER_BASE_SIZE,
+} from "@/lib/render";
 import { useSession } from "@/store/session";
 import type { PlacedSticker } from "@/types";
 import {
@@ -50,7 +55,10 @@ export function CollagePreview({
   stickersRef.current = stickers;
 
   const stickerKey = stickers
-    .map((item) => `${item.id}:${item.x}:${item.y}:${item.scale}:${item.rotation}:${item.emoji}`)
+    .map(
+      (item) =>
+        `${item.id}:${item.x}:${item.y}:${item.scale}:${item.rotation}:${item.emoji}:${item.mofusandId ?? ""}`,
+    )
     .join("|");
 
   const paintStickers = () => {
@@ -128,8 +136,14 @@ export function CollagePreview({
   ]);
 
   useLayoutEffect(() => {
-    paintStickers();
-  }, [interactive, stickerKey, layout.canvas.width, layout.canvas.height]);
+    let cancelled = false;
+    void preloadPlacedStickers(stickers).then(() => {
+      if (!cancelled) paintStickersRef.current();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [interactive, stickerKey, layout.canvas.width, layout.canvas.height, stickers]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -230,8 +244,15 @@ function StickerHitTarget({
 
   const sizePx =
     wrapWidth > 0
-      ? Math.max(28, (STICKER_BASE_SIZE * sticker.scale * wrapWidth) / canvasWidth)
-      : Math.max(28, STICKER_BASE_SIZE * sticker.scale);
+      ? Math.max(
+          28,
+          (STICKER_BASE_SIZE *
+            sticker.scale *
+            (sticker.mofusandId ? 1.35 : 1) *
+            wrapWidth) /
+            canvasWidth,
+        )
+      : Math.max(28, STICKER_BASE_SIZE * sticker.scale * (sticker.mofusandId ? 1.35 : 1));
 
   useEffect(() => {
     const node = nodeRef.current;
@@ -302,7 +323,7 @@ function StickerHitTarget({
     <button
       ref={nodeRef}
       type="button"
-      aria-label={`Stiker ${sticker.emoji}${selected ? ", terpilih" : ""}`}
+      aria-label={`Stiker ${sticker.mofusandId ? `Mofusand ${sticker.mofusandId}` : sticker.emoji}${selected ? ", terpilih" : ""}`}
       aria-pressed={selected}
       className="absolute z-10 rounded-full border-0 bg-transparent p-0"
       style={{

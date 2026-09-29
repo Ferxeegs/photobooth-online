@@ -63,6 +63,11 @@ export async function loadMofusandImages(
   kind: string,
 ): Promise<MofusandImages> {
   if (!kind.startsWith("mofusand-")) return { byId: new Map() };
+  return loadAllMofusandImages();
+}
+
+/** Load every Mofusand PNG (for frame décor + placeable stickers). */
+export async function loadAllMofusandImages(): Promise<MofusandImages> {
   const loaded = await Promise.all(
     MOFUSAND_STICKERS.map(async (item) => {
       const img = await loadCached(item.src);
@@ -74,6 +79,28 @@ export async function loadMofusandImages(
     if (entry) byId.set(entry[0], entry[1]);
   });
   return { byId };
+}
+
+/** Ensure keyed sprite is in cache; returns transparent canvas. */
+export async function loadMofusandSprite(
+  id: number,
+): Promise<HTMLCanvasElement | undefined> {
+  const item = MOFUSAND_STICKERS.find((entry) => entry.id === id);
+  if (!item) return undefined;
+  const img = await loadCached(item.src);
+  if (!img) return undefined;
+  return keyedSprite(img);
+}
+
+/** Sync read after loadMofusandSprite / loadAllMofusandImages. */
+export function getMofusandSprite(
+  id: number,
+): HTMLCanvasElement | undefined {
+  const item = MOFUSAND_STICKERS.find((entry) => entry.id === id);
+  if (!item) return undefined;
+  const img = imageCache.get(item.src);
+  if (!img?.complete) return undefined;
+  return keyedSprite(img);
 }
 
 function getSprite(

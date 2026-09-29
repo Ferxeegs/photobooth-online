@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { filters, stickerCatalog } from "@/data/filters";
 import { track } from "@/lib/analytics";
+import { MOFUSAND_STICKERS } from "@/lib/mofusand";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
 import { ArrowRight, Minus, Plus, RotateCcw, Trash2, Undo2 } from "lucide-react";
@@ -53,6 +54,33 @@ export function CustomizeScreen() {
     updateSticker(selected.id, { scale });
   }
 
+  function placeEmoji(emoji: string): void {
+    const id = crypto.randomUUID();
+    addSticker({
+      id,
+      emoji,
+      x: 0.35 + Math.random() * 0.3,
+      y: 0.3 + Math.random() * 0.4,
+      scale: 1,
+      rotation: 0,
+    });
+    setSelectedStickerId(id);
+  }
+
+  function placeMofusand(mofusandId: number): void {
+    const id = crypto.randomUUID();
+    addSticker({
+      id,
+      emoji: "",
+      mofusandId,
+      x: 0.35 + Math.random() * 0.3,
+      y: 0.3 + Math.random() * 0.4,
+      scale: 1.2,
+      rotation: 0,
+    });
+    setSelectedStickerId(id);
+  }
+
   return (
     <Shell
       title="Kustomisasi & Hiaskan Foto"
@@ -88,7 +116,15 @@ export function CustomizeScreen() {
           <div className="space-y-3 rounded-3xl glass-card p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-xs font-bold text-purple-950">
-                <span className="text-2xl leading-none">{selected.emoji}</span>
+                {selected.mofusandId ? (
+                  <img
+                    src={`/frames/mofusand/mofusand_${selected.mofusandId}.png`}
+                    alt=""
+                    className="size-8 rounded-lg bg-[#1a1a1a] object-contain p-0.5"
+                  />
+                ) : (
+                  <span className="text-2xl leading-none">{selected.emoji}</span>
+                )}
                 Ukuran stiker
               </p>
               <button
@@ -185,39 +221,56 @@ export function CustomizeScreen() {
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl glass-card p-4"
+            className="space-y-5 rounded-3xl glass-card p-4"
           >
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-bold text-purple-950">Ketuk emoji untuk menempel:</p>
-              <span className="text-[11px] font-semibold text-purple-800/60">
-                {stickers.length} stiker
-              </span>
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-purple-950">Mofusand</p>
+                <span className="text-[11px] font-semibold text-purple-800/60">
+                  {stickers.length} stiker
+                </span>
+              </div>
+              <p className="mt-0.5 text-[11px] font-medium text-purple-800/55">
+                Ketuk karakter untuk menempel di foto
+              </p>
+              <div className="mt-3 grid grid-cols-4 gap-2.5 sm:grid-cols-6">
+                {MOFUSAND_STICKERS.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileTap={{ scale: 0.92 }}
+                    type="button"
+                    aria-label={`Tempel Mofusand ${item.id}`}
+                    className="grid aspect-square place-items-center overflow-hidden rounded-2xl border border-purple-100 bg-[#1c1c1e] p-1 shadow-xs hover:border-violet-300 hover:ring-2 hover:ring-violet-200"
+                    onClick={() => placeMofusand(item.id)}
+                  >
+                    <img
+                      src={item.src}
+                      alt=""
+                      className="max-h-full max-w-full object-contain"
+                      draggable={false}
+                    />
+                  </motion.button>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-6 gap-2.5 sm:grid-cols-8">
-              {stickerCatalog.map((emoji) => (
-                <motion.button
-                  key={emoji}
-                  whileHover={{ scale: 1.2, rotate: 5 }}
-                  whileTap={{ scale: 0.85 }}
-                  type="button"
-                  className="grid size-11 place-items-center rounded-2xl border border-purple-100 bg-white/90 text-2xl shadow-xs hover:bg-white"
-                  onClick={() => {
-                    const id = crypto.randomUUID();
-                    addSticker({
-                      id,
-                      emoji,
-                      x: 0.35 + Math.random() * 0.3,
-                      y: 0.3 + Math.random() * 0.4,
-                      scale: 1,
-                      rotation: 0,
-                    });
-                    setSelectedStickerId(id);
-                  }}
-                >
-                  {emoji}
-                </motion.button>
-              ))}
+            <div>
+              <p className="text-xs font-bold text-purple-950">Emoji</p>
+              <div className="mt-3 grid grid-cols-6 gap-2.5 sm:grid-cols-8">
+                {stickerCatalog.map((emoji) => (
+                  <motion.button
+                    key={emoji}
+                    whileHover={{ scale: 1.2, rotate: 5 }}
+                    whileTap={{ scale: 0.85 }}
+                    type="button"
+                    className="grid size-11 place-items-center rounded-2xl border border-purple-100 bg-white/90 text-2xl shadow-xs hover:bg-white"
+                    onClick={() => placeEmoji(emoji)}
+                  >
+                    {emoji}
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </motion.div>
         ) : null}

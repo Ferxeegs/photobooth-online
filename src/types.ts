@@ -60,7 +60,10 @@ export interface Photo {
 
 export interface PlacedSticker {
   id: string;
+  /** Emoji glyph; empty when using a Mofusand image sticker */
   emoji: string;
+  /** 1..11 — draws keyed PNG from /frames/mofusand */
+  mofusandId?: number;
   x: number;
   y: number;
   scale: number;

@@ -1,13 +1,31 @@
 import { applyPhotoFilter } from "@/lib/colorFilter";
 import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
-import { loadMofusandImages } from "@/lib/mofusand";
+import {
+  getMofusandSprite,
+  loadMofusandImages,
+  loadMofusandSprite,
+} from "@/lib/mofusand";
 import type { FilterId, FrameStyle, Layout, Photo, PlacedSticker } from "@/types";
 
-/** Base emoji size in layout canvas units at scale = 1. */
+/** Base emoji / Mofusand size in layout canvas units at scale = 1. */
 export const STICKER_BASE_SIZE = 64;
 
 const STICKER_FONT =
   '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+
+/** Preload keyed Mofusand sprites used by placed stickers. */
+export async function preloadPlacedStickers(
+  stickers: PlacedSticker[],
+): Promise<void> {
+  const ids = [
+    ...new Set(
+      stickers
+        .map((item) => item.mofusandId)
+        .filter((id): id is number => typeof id === "number"),
+    ),
+  ];
+  await Promise.all(ids.map((id) => loadMofusandSprite(id)));
+}
 
 /** Draw stickers in layout canvas coordinates (same path for preview + export). */
 export function drawStickers(
@@ -21,10 +39,28 @@ export function drawStickers(
     ctx.translate(sticker.x * canvasW, sticker.y * canvasH);
     ctx.rotate((sticker.rotation * Math.PI) / 180);
     const size = Math.max(1, Math.round(STICKER_BASE_SIZE * sticker.scale));
-    ctx.font = `${size}px ${STICKER_FONT}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(sticker.emoji, 0, 0);
+
+    if (sticker.mofusandId) {
+      const sprite = getMofusandSprite(sticker.mofusandId);
+      if (sprite) {
+        const iw = sprite.width;
+        const ih = sprite.height;
+        if (iw && ih) {
+          const scale = Math.min(size / iw, size / ih) * 1.35;
+          const dw = iw * scale;
+          const dh = ih * scale;
+          ctx.shadowColor = "rgba(40, 30, 50, 0.2)";
+          ctx.shadowBlur = Math.max(4, size * 0.08);
+          ctx.shadowOffsetY = Math.max(1, size * 0.03);
+          ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
+        }
+      }
+    } else if (sticker.emoji) {
+      ctx.font = `${size}px ${STICKER_FONT}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(sticker.emoji, 0, 0);
+    }
     ctx.restore();
   });
 }
@@ -242,6 +278,7 @@ export async function renderCollage(
   }
 
   if (includeStickers) {
+    await preloadPlacedStickers(stickers);
     drawStickers(ctx, stickers, layout.canvas.width, layout.canvas.height);
   }
 
