@@ -61,6 +61,7 @@ export function CaptureScreen() {
   const needed = layout.photoCount;
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const camGenRef = useRef(0);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [count, setCount] = useState<number | null>(null);
@@ -75,26 +76,46 @@ export function CaptureScreen() {
   const mirrored = facing === "user";
 
   const stopCam = useCallback(() => {
+    camGenRef.current += 1;
     stopStream(streamRef.current);
     streamRef.current = null;
     setReady(false);
   }, []);
 
   const startCam = useCallback(async (mode = facing) => {
+    const gen = ++camGenRef.current;
     setError("");
     setReady(false);
     try {
       stopStream(streamRef.current);
+      streamRef.current = null;
       const stream = await startCamera(mode);
+      // Stale / interrupted attempt (Strict Mode remount, flip, unmount)
+      if (gen !== camGenRef.current) {
+        stopStream(stream);
+        return;
+      }
       streamRef.current = stream;
       const video = videoRef.current;
-      if (video) {
-        video.srcObject = stream;
-        await video.play();
-        setReady(true);
+      if (!video) {
+        stopStream(stream);
+        streamRef.current = null;
+        if (gen === camGenRef.current) {
+          setError("Gagal membuka kamera. Coba lagi atau unggah foto dari galeri.");
+        }
+        return;
       }
+      video.srcObject = stream;
+      await video.play();
+      if (gen !== camGenRef.current) return;
+      setReady(true);
+      setError("");
     } catch (err) {
+      if (gen !== camGenRef.current) return;
+      // play() AbortError when stream is replaced mid-start — not a real failure
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(cameraErrorMessage(err));
+      setReady(false);
     }
   }, [facing]);
 
@@ -102,7 +123,7 @@ export function CaptureScreen() {
     if (source !== "camera") return;
     void startCam();
     return () => stopCam();
-  }, [source, startCam, stopCam]);
+  }, [source, facing, startCam, stopCam]);
 
   useEffect(() => {
     const onLeave = (event: BeforeUnloadEvent) => {
@@ -345,7 +366,7 @@ export function CaptureScreen() {
 
         {/* Controls & Options Panel */}
         <div className="flex min-w-0 flex-1 flex-col lg:max-w-md">
-          {error ? (
+          {error && !ready ? (
             <div className="mb-4 rounded-3xl bg-pink-100 p-4 text-xs text-pink-900 border border-pink-200">
               <p className="font-bold text-sm">{error}</p>
               <div className="mt-3 flex gap-2">
