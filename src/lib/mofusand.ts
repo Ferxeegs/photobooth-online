@@ -358,18 +358,20 @@ function drawSharkParty(
   softBorder(ctx, w, h, "#FFFFFF", 8, 22);
   softBorder(ctx, w, h, accent, 3.5, 32);
   bubbles(ctx, w, h);
-  brand(ctx, w, "#4A6F80", "same-nyan");
 
   const s = stickerSize(w, 0.2);
   const edge = s * 0.58;
+  // Corners only — keep center clear for brand + date
   drawSticker(ctx, images, 3, edge, edge, s);
   drawSticker(ctx, images, 9, w - edge, edge, s * 0.96, true);
   drawSticker(ctx, images, 10, edge, h - edge, s * 0.96);
   drawSticker(ctx, images, 5, w - edge, h - edge, s, true, -0.25);
-  drawSticker(ctx, images, 9, w / 2, edge * 0.92, s * 0.8);
-  drawSticker(ctx, images, 10, w / 2, h - edge * 0.92, s * 0.8, true);
-  drawSticker(ctx, images, 5, edge * 0.88, h / 2, s * 0.72, false, 0.4);
-  drawSticker(ctx, images, 3, w - edge * 0.88, h / 2, s * 0.72, true, -0.28);
+  // Mid sides (between photo slots)
+  drawSticker(ctx, images, 5, edge * 0.88, h / 2 - s * 0.55, s * 0.72, false, 0.35);
+  drawSticker(ctx, images, 3, w - edge * 0.88, h / 2 - s * 0.55, s * 0.72, true, -0.28);
+  drawSticker(ctx, images, 9, edge * 0.88, h / 2 + s * 0.55, s * 0.68);
+  drawSticker(ctx, images, 10, w - edge * 0.88, h / 2 + s * 0.55, s * 0.68, true);
+  brand(ctx, w, "#4A6F80", "same-nyan");
 }
 
 /** Strawberry cats — stickers 2, 8 */
@@ -385,7 +387,6 @@ function drawBerryParty(
   softBorder(ctx, w, h, "#F9A8D4", 3.5, 30);
   seeds(ctx, w, h);
   hearts(ctx, w, h, "#FB7185");
-  brand(ctx, w, "#BE123C", "ichigo-nyan");
 
   const s = stickerSize(w, 0.21);
   const edge = s * 0.56;
@@ -393,10 +394,11 @@ function drawBerryParty(
   drawSticker(ctx, images, 8, w - edge, edge, s * 0.94, true);
   drawSticker(ctx, images, 8, edge, h - edge, s * 0.94);
   drawSticker(ctx, images, 2, w - edge, h - edge, s, true);
-  drawSticker(ctx, images, 2, w / 2, edge * 0.88, s * 0.78);
-  drawSticker(ctx, images, 8, w / 2, h - edge * 0.88, s * 0.78, true);
-  drawSticker(ctx, images, 8, edge * 0.82, h / 2, s * 0.7, false, 0.12);
-  drawSticker(ctx, images, 2, w - edge * 0.82, h / 2, s * 0.7, true, -0.12);
+  drawSticker(ctx, images, 8, edge * 0.82, h / 2 - s * 0.5, s * 0.7, false, 0.12);
+  drawSticker(ctx, images, 2, w - edge * 0.82, h / 2 - s * 0.5, s * 0.7, true, -0.12);
+  drawSticker(ctx, images, 2, edge * 0.82, h / 2 + s * 0.5, s * 0.66);
+  drawSticker(ctx, images, 8, w - edge * 0.82, h / 2 + s * 0.5, s * 0.66, true);
+  brand(ctx, w, "#BE123C", "ichigo-nyan");
 }
 
 /** Cafe sweets — ebi 1 + purin 11 */
@@ -411,7 +413,6 @@ function drawCafeParty(
   softBorder(ctx, w, h, "#FFFBEB", 8, 20);
   softBorder(ctx, w, h, "#F59E0B", 3.5, 30);
   cherries(ctx, w, h);
-  brand(ctx, w, "#9A3412", "ebi · purin cafe");
 
   const s = stickerSize(w, 0.2);
   const edge = s * 0.58;
@@ -419,10 +420,11 @@ function drawCafeParty(
   drawSticker(ctx, images, 11, w - edge, edge, s * 0.96, true);
   drawSticker(ctx, images, 11, edge, h - edge, s * 0.96);
   drawSticker(ctx, images, 1, w - edge, h - edge, s, true);
-  drawSticker(ctx, images, 11, w / 2, edge * 0.9, s * 0.76);
-  drawSticker(ctx, images, 1, w / 2, h - edge * 0.9, s * 0.76, true);
-  drawSticker(ctx, images, 4, edge * 0.88, h / 2, s * 0.68);
-  drawSticker(ctx, images, 4, w - edge * 0.88, h / 2, s * 0.68, true);
+  drawSticker(ctx, images, 4, edge * 0.88, h / 2 - s * 0.5, s * 0.68);
+  drawSticker(ctx, images, 4, w - edge * 0.88, h / 2 - s * 0.5, s * 0.68, true);
+  drawSticker(ctx, images, 11, edge * 0.88, h / 2 + s * 0.5, s * 0.64);
+  drawSticker(ctx, images, 1, w - edge * 0.88, h / 2 + s * 0.5, s * 0.64, true);
+  brand(ctx, w, "#9A3412", "ebi · purin cafe");
 }
 
 /** Costume friends — duck 4, bunny 6, snorlax 7 */
@@ -436,7 +438,6 @@ function drawFriendsParty(
   ginghamBand(ctx, w, h, "#E0F2FE", "#FFFFFF", 48);
   softBorder(ctx, w, h, accent, 4.5, 48);
   hearts(ctx, w, h, "#93C5FD");
-  brand(ctx, w, "#475569", "mofu friends");
 
   const s = stickerSize(w, 0.19);
   const edge = Math.max(56, s * 0.68);
@@ -444,10 +445,11 @@ function drawFriendsParty(
   drawSticker(ctx, images, 6, w - edge, edge + 6, s * 0.96, true);
   drawSticker(ctx, images, 7, edge, h - edge - 6, s * 0.96);
   drawSticker(ctx, images, 4, w - edge, h - edge - 6, s, true);
-  drawSticker(ctx, images, 6, w / 2, edge + 2, s * 0.8);
-  drawSticker(ctx, images, 7, w / 2, h - edge - 2, s * 0.8, true);
-  drawSticker(ctx, images, 7, edge * 0.92, h / 2, s * 0.72);
-  drawSticker(ctx, images, 6, w - edge * 0.92, h / 2, s * 0.72, true);
+  drawSticker(ctx, images, 7, edge * 0.92, h / 2 - s * 0.5, s * 0.72);
+  drawSticker(ctx, images, 6, w - edge * 0.92, h / 2 - s * 0.5, s * 0.72, true);
+  drawSticker(ctx, images, 6, edge * 0.92, h / 2 + s * 0.5, s * 0.68);
+  drawSticker(ctx, images, 7, w - edge * 0.92, h / 2 + s * 0.5, s * 0.68, true);
+  brand(ctx, w, "#475569", "mofu friends");
 }
 
 /** Mix of favorites around the strip */
@@ -463,20 +465,23 @@ function drawMixParty(
   softBorder(ctx, w, h, accent, 3.5, 28);
   bubbles(ctx, w, h, "rgba(196,181,253,0.32)");
   hearts(ctx, w, h, "#DDD6FE");
-  brand(ctx, w, "#6D28D9", "mofusand");
 
   const s = stickerSize(w, 0.175);
   const edge = s * 0.55;
+  // Top corners + outer thirds (leave center for brand)
   drawSticker(ctx, images, 3, edge, edge, s);
-  drawSticker(ctx, images, 2, w / 2 - s * 0.58, edge * 0.88, s * 0.74);
-  drawSticker(ctx, images, 11, w / 2 + s * 0.58, edge * 0.88, s * 0.74, true);
+  drawSticker(ctx, images, 2, edge + s * 0.95, edge * 0.95, s * 0.7);
+  drawSticker(ctx, images, 11, w - edge - s * 0.95, edge * 0.95, s * 0.7, true);
   drawSticker(ctx, images, 9, w - edge, edge, s, true);
+  // Bottom corners + outer thirds (leave center for date)
   drawSticker(ctx, images, 8, edge, h - edge, s);
-  drawSticker(ctx, images, 10, w / 2 - s * 0.58, h - edge * 0.88, s * 0.74);
-  drawSticker(ctx, images, 1, w / 2 + s * 0.58, h - edge * 0.88, s * 0.74, true);
+  drawSticker(ctx, images, 10, edge + s * 0.95, h - edge * 0.95, s * 0.7);
+  drawSticker(ctx, images, 1, w - edge - s * 0.95, h - edge * 0.95, s * 0.7, true);
   drawSticker(ctx, images, 5, w - edge, h - edge, s, true, -0.18);
+  // Mid sides
   drawSticker(ctx, images, 6, edge * 0.82, h / 2 - s * 0.38, s * 0.7);
   drawSticker(ctx, images, 7, edge * 0.82, h / 2 + s * 0.42, s * 0.7);
   drawSticker(ctx, images, 4, w - edge * 0.82, h / 2 - s * 0.38, s * 0.7, true);
   drawSticker(ctx, images, 10, w - edge * 0.82, h / 2 + s * 0.42, s * 0.7, true);
+  brand(ctx, w, "#6D28D9", "mofusand");
 }

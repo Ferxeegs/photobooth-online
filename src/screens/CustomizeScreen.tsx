@@ -1,5 +1,6 @@
 import { CollagePreview } from "@/components/CollagePreview";
 import { CuteMascot } from "@/components/CuteMascot";
+import { MofusandThumb } from "@/components/MofusandThumb";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -117,11 +118,9 @@ export function CustomizeScreen() {
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-xs font-bold text-purple-950">
                 {selected.mofusandId ? (
-                  <img
-                    src={`/frames/mofusand/mofusand_${selected.mofusandId}.png`}
-                    alt=""
-                    className="size-8 rounded-lg bg-[#1a1a1a] object-contain p-0.5"
-                  />
+                  <span className="grid size-8 place-items-center overflow-hidden rounded-lg bg-violet-50 ring-1 ring-purple-100">
+                    <MofusandThumb id={selected.mofusandId} size={64} className="size-full" />
+                  </span>
                 ) : (
                   <span className="text-2xl leading-none">{selected.emoji}</span>
                 )}
@@ -241,15 +240,10 @@ export function CustomizeScreen() {
                     whileTap={{ scale: 0.92 }}
                     type="button"
                     aria-label={`Tempel Mofusand ${item.id}`}
-                    className="grid aspect-square place-items-center overflow-hidden rounded-2xl border border-purple-100 bg-[#1c1c1e] p-1 shadow-xs hover:border-violet-300 hover:ring-2 hover:ring-violet-200"
+                    className="grid aspect-square place-items-center overflow-hidden rounded-2xl border border-purple-100 bg-violet-50 p-1.5 shadow-xs hover:border-violet-300 hover:bg-white hover:ring-2 hover:ring-violet-200"
                     onClick={() => placeMofusand(item.id)}
                   >
-                    <img
-                      src={item.src}
-                      alt=""
-                      className="max-h-full max-w-full object-contain"
-                      draggable={false}
-                    />
+                    <MofusandThumb id={item.id} size={112} className="size-full" />
                   </motion.button>
                 ))}
               </div>
