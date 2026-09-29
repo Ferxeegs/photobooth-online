@@ -1,6 +1,30 @@
 import type { FrameStyle } from "@/types";
 
 export const frames: FrameStyle[] = [
+  // —— Tanpa bingkai ——
+  {
+    id: "no-frame",
+    name: "Tanpa Bingkai",
+    theme: "cute",
+    bg: "#FFFFFF",
+    palette: ["#FFFFFF", "#FAFAFA", "#F4F4F5", "#F8FAFC", "#F5F3FF"],
+    captionColor: "#3F3F46",
+    accent: "#E4E4E7",
+    mat: "#FFFFFF",
+    decoration: "none",
+  },
+  // —— Lucu ——
+  {
+    id: "plain-soft",
+    name: "Polos Soft",
+    theme: "cute",
+    bg: "#FFFFFF",
+    palette: ["#FFFFFF", "#F8F7FC", "#F5F3FF", "#FFF5FB", "#F0F9FF"],
+    captionColor: "#5B21B6",
+    accent: "#C4B5FD",
+    mat: "#FFFFFF",
+    decoration: "plain",
+  },
   {
     id: "bear-bunny",
     name: "Bear & Bunny",
@@ -57,6 +81,40 @@ export const frames: FrameStyle[] = [
     decoration: "cartoon",
   },
   {
+    id: "candy-pop",
+    name: "Candy Pop",
+    theme: "cute",
+    bg: "#FFF5FB",
+    palette: ["#FFF5FB", "#FFE4F0", "#E8F8FF", "#F3FFE8", "#FFF8D6"],
+    captionColor: "#9D174D",
+    accent: "#FF6B9D",
+    mat: "#FFFFFF",
+    decoration: "candy",
+  },
+  {
+    id: "melody-note",
+    name: "Melody Note",
+    theme: "cute",
+    bg: "#F3E8FF",
+    palette: ["#F3E8FF", "#EDE9FE", "#FCE7F3", "#E0F2FE", "#FFFFFF"],
+    captionColor: "#5B21B6",
+    accent: "#A78BFA",
+    mat: "#FFFFFF",
+    decoration: "melody",
+  },
+  // —— Kucing ——
+  {
+    id: "plain-cream",
+    name: "Polos Cream",
+    theme: "cat",
+    bg: "#FFFBF6",
+    palette: ["#FFFBF6", "#FFF3E8", "#FFFFFF", "#F5F0FF", "#FFE8F0"],
+    captionColor: "#8A4A28",
+    accent: "#E8D5C4",
+    mat: "#FFFFFF",
+    decoration: "plain",
+  },
+  {
     id: "kitty-cafe",
     name: "Kitty Cafe",
     theme: "cat",
@@ -99,6 +157,18 @@ export const frames: FrameStyle[] = [
     accent: "#7C3AED",
     mat: "#FFFFFF",
     decoration: "cats-paws",
+  },
+  // —— Romantis ——
+  {
+    id: "plain-blush",
+    name: "Polos Blush",
+    theme: "romantic",
+    bg: "#FFF8FA",
+    palette: ["#FFF8FA", "#FFE4EC", "#FFFFFF", "#F7F1EA", "#F8E8EE"],
+    captionColor: "#7A3048",
+    accent: "#E8B4C8",
+    mat: "#FFFFFF",
+    decoration: "plain",
   },
   {
     id: "rose-garden",
@@ -156,6 +226,40 @@ export const frames: FrameStyle[] = [
     decoration: "sunset",
   },
   {
+    id: "sakura-lane",
+    name: "Sakura Lane",
+    theme: "romantic",
+    bg: "#FFF1F5",
+    palette: ["#FFF1F5", "#FCE7F3", "#FDF2F8", "#F5F3FF", "#FFFFFF"],
+    captionColor: "#9D174D",
+    accent: "#F9A8D4",
+    mat: "#FFFFFF",
+    decoration: "sakura",
+  },
+  // —— Keren ——
+  {
+    id: "plain-white",
+    name: "Polos Putih",
+    theme: "cool",
+    bg: "#FFFFFF",
+    palette: ["#FFFFFF", "#F4F4F5", "#E4E4E7", "#FAFAFA", "#F8FAFC"],
+    captionColor: "#18181B",
+    accent: "#A1A1AA",
+    mat: "#FFFFFF",
+    decoration: "plain",
+  },
+  {
+    id: "plain-black",
+    name: "Polos Hitam",
+    theme: "cool",
+    bg: "#111111",
+    palette: ["#111111", "#1A1A1A", "#0A0A0A", "#222222", "#18181B"],
+    captionColor: "#F4F4F5",
+    accent: "#52525B",
+    mat: "#1A1A1A",
+    decoration: "plain",
+  },
+  {
     id: "neon-night",
     name: "Neon Night",
     theme: "cool",
@@ -210,13 +314,24 @@ export const frames: FrameStyle[] = [
     mat: "#F4ECD8",
     decoration: "vintage",
   },
+  {
+    id: "hologram",
+    name: "Hologram",
+    theme: "cool",
+    bg: "#0F172A",
+    palette: ["#0F172A", "#1E1B4B", "#083344", "#111827", "#000000"],
+    captionColor: "#E0F2FE",
+    accent: "#67E8F9",
+    mat: "#1E293B",
+    decoration: "hologram",
+  },
 ];
 
 export const bgPalettes: Record<string, string[]> = {
-  cute: ["#EDE9FE", "#DDD6FE", "#C4B5FD", "#A78BFA", "#F5F3FF", "#FFFFFF"],
+  cute: ["#EDE9FE", "#DDD6FE", "#FFE4F0", "#E8F6FF", "#FFF5FB", "#FFFFFF"],
   cat: ["#FFF3E8", "#FFE8F0", "#F5F0FF", "#2A1848", "#FFFFFF", "#FFFBEA"],
-  romantic: ["#F8E8EE", "#F6ECD9", "#FFE4EC", "#F7F1EA", "#F7C9A8", "#FFFFFF"],
-  cool: ["#0B0714", "#111111", "#D9DEE8", "#F4F0E6", "#E8DCC8", "#1A2030"],
+  romantic: ["#F8E8EE", "#F6ECD9", "#FFE4EC", "#F7F1EA", "#FFF1F5", "#FFFFFF"],
+  cool: ["#0B0714", "#111111", "#D9DEE8", "#F4F0E6", "#E8DCC8", "#0F172A"],
 };
 
 export function getFrame(id: string): FrameStyle {

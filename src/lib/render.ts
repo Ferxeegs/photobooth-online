@@ -120,16 +120,9 @@ export async function renderCollage(
     const img = filtered[index];
     const photo = photos[index];
 
-    // Polaroid / booth matte
+    // Polaroid / booth matte — sharp corners
     ctx.save();
-    roundedRect(
-      ctx,
-      slot.x - 10,
-      slot.y - 10,
-      slot.w + 20,
-      slot.h + 20,
-      Math.max(slot.radius + 6, 12),
-    );
+    roundedRect(ctx, slot.x - 10, slot.y - 10, slot.w + 20, slot.h + 20, slot.radius);
     ctx.fillStyle = frame.mat || "#ffffff";
     ctx.fill();
     ctx.restore();
@@ -144,7 +137,7 @@ export async function renderCollage(
       slot.y - 10.5,
       slot.w + 21,
       slot.h + 21,
-      Math.max(slot.radius + 6, 12),
+      slot.radius,
     );
     ctx.stroke();
     ctx.restore();
@@ -173,11 +166,11 @@ export async function renderCollage(
     ctx.save();
     ctx.strokeStyle = "rgba(255,255,255,0.65)";
     ctx.lineWidth = 2;
-    roundedRect(ctx, slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2, Math.max(0, slot.radius - 1));
+    roundedRect(ctx, slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2, slot.radius);
     ctx.stroke();
     ctx.strokeStyle = `${frame.accent}33`;
     ctx.lineWidth = 1.5;
-    roundedRect(ctx, slot.x - 1, slot.y - 1, slot.w + 2, slot.h + 2, slot.radius + 1);
+    roundedRect(ctx, slot.x - 1, slot.y - 1, slot.w + 2, slot.h + 2, slot.radius);
     ctx.stroke();
     ctx.restore();
   });

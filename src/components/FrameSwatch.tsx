@@ -29,14 +29,14 @@ export function FrameSwatch({
     ctx.fillStyle = frame.bg;
     ctx.fillRect(0, 0, w, h);
     const slots: Slot[] = [
-      { x: 24, y: 28, w: 112, h: 66, radius: 8 },
-      { x: 24, y: 104, w: 112, h: 66, radius: 8 },
+      { x: 24, y: 28, w: 112, h: 66, radius: 0 },
+      { x: 24, y: 104, w: 112, h: 66, radius: 0 },
     ];
     slots.forEach((slot) => {
-      roundedRect(ctx, slot.x - 5, slot.y - 5, slot.w + 10, slot.h + 10, slot.radius + 4);
+      roundedRect(ctx, slot.x - 5, slot.y - 5, slot.w + 10, slot.h + 10, 0);
       ctx.fillStyle = frame.mat;
       ctx.fill();
-      roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
+      roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 0);
       const g = ctx.createLinearGradient(slot.x, slot.y, slot.x + slot.w, slot.y + slot.h);
       g.addColorStop(0, `${frame.accent}55`);
       g.addColorStop(1, `${frame.accent}22`);
@@ -44,14 +44,14 @@ export function FrameSwatch({
       ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,0.5)";
       ctx.lineWidth = 1;
-      roundedRect(ctx, slot.x + 0.5, slot.y + 0.5, slot.w - 1, slot.h - 1, slot.radius);
+      roundedRect(ctx, slot.x + 0.5, slot.y + 0.5, slot.w - 1, slot.h - 1, 0);
       ctx.stroke();
     });
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, w, h);
     slots.forEach((slot) => {
-      pathRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
+      pathRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, 0);
       ctx.closePath();
     });
     ctx.clip("evenodd");

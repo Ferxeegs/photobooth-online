@@ -149,7 +149,7 @@ export function CollagePreview({
   return (
     <div
       ref={wrapRef}
-      className={`relative mx-auto overflow-hidden rounded-3xl bg-white shadow-lg ${className}`}
+      className={`relative mx-auto overflow-hidden bg-white shadow-lg ${className}`}
       style={{
         width: `min(100%, ${widthCapPx}px)`,
         aspectRatio: `${layout.canvas.width} / ${layout.canvas.height}`,

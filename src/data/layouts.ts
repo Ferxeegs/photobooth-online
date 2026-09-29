@@ -16,11 +16,11 @@ function stripLandscape(
   canvasW: number,
   canvasH: number,
   captionH: number,
-  topPad = 72,
-  bottomPad = 24,
+  topPad = 96,
+  bottomPad = 28,
 ): Layout["slots"] {
-  const sidePad = 44;
-  const gap = 20;
+  const sidePad = 64;
+  const gap = 28;
   const cellW = canvasW - sidePad * 2;
   const availableH = canvasH - topPad - bottomPad - captionH - gap * (count - 1);
   const cellH = availableH / count;
@@ -32,7 +32,7 @@ function stripLandscape(
     y: Math.round(topPad + i * (h + gap)),
     w,
     h,
-    radius: 16,
+    radius: 0,
   }));
 }
 
@@ -44,8 +44,8 @@ export const layouts: Layout[] = [
     photoCount: 4,
     orientation: "vertical",
     canvas: { width: 600, height: 1800 },
-    slots: stripLandscape(4, 600, 1800, 120, 72, 24),
-    captionArea: { x: 44, y: 1664, w: 512, h: 112 },
+    slots: stripLandscape(4, 600, 1800, 120, 96, 28),
+    captionArea: { x: 48, y: 1660, w: 504, h: 116 },
   },
   {
     id: "strip-3",
@@ -54,8 +54,8 @@ export const layouts: Layout[] = [
     photoCount: 3,
     orientation: "vertical",
     canvas: { width: 600, height: 1500 },
-    slots: stripLandscape(3, 600, 1500, 130, 76, 24),
-    captionArea: { x: 44, y: 1346, w: 512, h: 130 },
+    slots: stripLandscape(3, 600, 1500, 130, 96, 28),
+    captionArea: { x: 48, y: 1340, w: 504, h: 136 },
   },
   {
     id: "strip-2",
@@ -64,8 +64,8 @@ export const layouts: Layout[] = [
     photoCount: 2,
     orientation: "vertical",
     canvas: { width: 600, height: 1200 },
-    slots: stripLandscape(2, 600, 1200, 180, 80, 24),
-    captionArea: { x: 44, y: 996, w: 512, h: 180 },
+    slots: stripLandscape(2, 600, 1200, 160, 100, 28),
+    captionArea: { x: 48, y: 1010, w: 504, h: 166 },
   },
   {
     id: "grid-2x2",
@@ -75,12 +75,12 @@ export const layouts: Layout[] = [
     orientation: "square",
     canvas: { width: 1200, height: 1200 },
     slots: [
-      { x: 48, y: 80, w: 540, h: 405, radius: 24 },
-      { x: 612, y: 80, w: 540, h: 405, radius: 24 },
-      { x: 48, y: 515, w: 540, h: 405, radius: 24 },
-      { x: 612, y: 515, w: 540, h: 405, radius: 24 },
+      { x: 64, y: 96, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 96, w: 520, h: 390, radius: 0 },
+      { x: 64, y: 520, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 520, w: 520, h: 390, radius: 0 },
     ],
-    captionArea: { x: 48, y: 950, w: 1104, h: 200 },
+    captionArea: { x: 64, y: 940, w: 1072, h: 220 },
   },
   {
     id: "grid-2x3",
@@ -90,14 +90,14 @@ export const layouts: Layout[] = [
     orientation: "vertical",
     canvas: { width: 1200, height: 1800 },
     slots: [
-      { x: 48, y: 76, w: 540, h: 405, radius: 22 },
-      { x: 612, y: 76, w: 540, h: 405, radius: 22 },
-      { x: 48, y: 506, w: 540, h: 405, radius: 22 },
-      { x: 612, y: 506, w: 540, h: 405, radius: 22 },
-      { x: 48, y: 936, w: 540, h: 405, radius: 22 },
-      { x: 612, y: 936, w: 540, h: 405, radius: 22 },
+      { x: 64, y: 90, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 90, w: 520, h: 390, radius: 0 },
+      { x: 64, y: 516, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 516, w: 520, h: 390, radius: 0 },
+      { x: 64, y: 942, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 942, w: 520, h: 390, radius: 0 },
     ],
-    captionArea: { x: 48, y: 1370, w: 1104, h: 380 },
+    captionArea: { x: 64, y: 1370, w: 1072, h: 380 },
   },
   {
     id: "polaroid",
@@ -106,8 +106,8 @@ export const layouts: Layout[] = [
     photoCount: 1,
     orientation: "vertical",
     canvas: { width: 1080, height: 1080 },
-    slots: [{ x: 70, y: 76, w: 940, h: 705, radius: 12 }],
-    captionArea: { x: 70, y: 810, w: 940, h: 220 },
+    slots: [{ x: 80, y: 90, w: 920, h: 690, radius: 0 }],
+    captionArea: { x: 80, y: 810, w: 920, h: 220 },
   },
   {
     id: "hero-2",
@@ -117,11 +117,11 @@ export const layouts: Layout[] = [
     orientation: "vertical",
     canvas: { width: 1200, height: 1800 },
     slots: [
-      { x: 48, y: 76, w: 1104, h: 828, radius: 28 },
-      { x: 48, y: 930, w: 540, h: 405, radius: 24 },
-      { x: 612, y: 930, w: 540, h: 405, radius: 24 },
+      { x: 64, y: 90, w: 1072, h: 804, radius: 0 },
+      { x: 64, y: 930, w: 520, h: 390, radius: 0 },
+      { x: 616, y: 930, w: 520, h: 390, radius: 0 },
     ],
-    captionArea: { x: 48, y: 1365, w: 1104, h: 380 },
+    captionArea: { x: 64, y: 1360, w: 1072, h: 380 },
   },
   {
     id: "landscape-2",
@@ -131,10 +131,10 @@ export const layouts: Layout[] = [
     orientation: "horizontal",
     canvas: { width: 1800, height: 900 },
     slots: [
-      { x: 48, y: 76, w: 840, h: 630, radius: 28 },
-      { x: 912, y: 76, w: 840, h: 630, radius: 28 },
+      { x: 64, y: 90, w: 820, h: 615, radius: 0 },
+      { x: 916, y: 90, w: 820, h: 615, radius: 0 },
     ],
-    captionArea: { x: 48, y: 730, w: 1704, h: 140 },
+    captionArea: { x: 64, y: 740, w: 1672, h: 130 },
   },
 ];
 

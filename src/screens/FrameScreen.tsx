@@ -17,10 +17,14 @@ const themes: ThemeId[] = ["cute", "cat", "romantic", "cool"];
 export function FrameScreen() {
   const { frameId, setFrame, background, setBackground, setStep } = useSession();
   const current = frames.find((item) => item.id === frameId) ?? frames[0];
-  const [theme, setTheme] = useState<ThemeId>(current?.theme ?? "cute");
+  const [theme, setTheme] = useState<ThemeId>(
+    current?.id === "no-frame" ? "cute" : (current?.theme ?? "cute"),
+  );
   if (!current) return null;
-  const visible = frames.filter((item) => item.theme === theme);
-  const darkUi = theme === "cool" || current.id === "moon-neko";
+  const noFrame = frames.find((item) => item.id === "no-frame");
+  const visible = frames.filter(
+    (item) => item.theme === theme && item.id !== "no-frame",
+  );
 
   return (
     <Shell
@@ -28,7 +32,6 @@ export function FrameScreen() {
       subtitle="Bingkai akan disesuaikan dengan foto aslimu secara langsung"
       progress={75}
       onBack={() => setStep("review")}
-      dark={darkUi}
       footer={
         <Button
           className="w-full py-3.5 text-base"
@@ -49,9 +52,51 @@ export function FrameScreen() {
         </div>
 
         {/* Mascot Advice */}
-        <div className={`rounded-3xl p-4 ${darkUi ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
-          <CuteMascot expression="excited" speech={`Bingkai ${current.name} pas banget!`} />
+        <div className="rounded-3xl glass-card p-4">
+          <CuteMascot
+            expression="excited"
+            speech={
+              current.id === "no-frame"
+                ? "Tanpa bingkai — bersih dan fokusus ke fotomu!"
+                : `Bingkai ${current.name} pas banget!`
+            }
+          />
         </div>
+
+        {/* Always-visible: no frame */}
+        {noFrame ? (
+          <button
+            type="button"
+            onClick={() => setFrame(noFrame.id, noFrame.bg)}
+            aria-pressed={frameId === noFrame.id}
+            className="text-left outline-none"
+          >
+            <div
+              className={`flex items-center gap-3 rounded-3xl border-2 p-3 transition-all ${
+                frameId === noFrame.id
+                  ? "border-purple-500 bg-purple-50 ring-2 ring-purple-200"
+                  : "border-purple-100 bg-white/80 hover:border-purple-200"
+              }`}
+            >
+              <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-400">
+                none
+              </div>
+              <div>
+                <p className="font-display text-sm font-bold text-purple-950">
+                  Tanpa Bingkai
+                </p>
+                <p className="text-[11px] font-semibold text-purple-800/60">
+                  Default putih — tanpa ornamen
+                </p>
+              </div>
+              {frameId === noFrame.id ? (
+                <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white">
+                  ✓
+                </span>
+              ) : null}
+            </div>
+          </button>
+        ) : null}
 
         {/* Theme Tabs */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
@@ -78,7 +123,7 @@ export function FrameScreen() {
         </div>
 
         {/* Color Palette Switcher */}
-        <div className={`rounded-3xl p-4 space-y-2.5 ${darkUi ? "bg-slate-900 border border-slate-800" : "glass-card"}`}>
+        <div className="rounded-3xl glass-card space-y-2.5 p-4">
           <p className="text-xs font-bold tracking-wide">🎨 Ubah Warna Latar Bingkai:</p>
           <div className="flex flex-wrap gap-2.5">
             {(bgPalettes[theme] ?? []).concat(current.palette).filter(unique).map((color) => (
