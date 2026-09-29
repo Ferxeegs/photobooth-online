@@ -7,16 +7,23 @@ import { filters, stickerCatalog } from "@/data/filters";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
-import { RotateCcw, Undo2, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Minus, Plus, RotateCcw, Trash2, Undo2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type Tab = "filter" | "sticker" | "text";
+
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 2.5;
+const SCALE_STEP = 0.1;
 
 export function CustomizeScreen() {
   const {
     filter,
     setFilter,
+    stickers,
     addSticker,
+    updateSticker,
+    removeSticker,
     undoSticker,
     resetCustomize,
     caption,
@@ -27,6 +34,24 @@ export function CustomizeScreen() {
     stickerHistory,
   } = useSession();
   const [tab, setTab] = useState<Tab>("filter");
+  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+
+  const selected = useMemo(
+    () => stickers.find((item) => item.id === selectedStickerId) ?? null,
+    [stickers, selectedStickerId],
+  );
+
+  useEffect(() => {
+    if (selectedStickerId && !stickers.some((item) => item.id === selectedStickerId)) {
+      setSelectedStickerId(null);
+    }
+  }, [stickers, selectedStickerId]);
+
+  function setScale(next: number): void {
+    if (!selected) return;
+    const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round(next * 10) / 10));
+    updateSticker(selected.id, { scale });
+  }
 
   return (
     <Shell
@@ -45,20 +70,79 @@ export function CustomizeScreen() {
       }
     >
       <div className="flex flex-col gap-4">
-        {/* Interactive Collage Preview */}
         <div className="relative">
-          <CollagePreview interactive />
+          <CollagePreview
+            interactive
+            selectedStickerId={selectedStickerId}
+            onSelectSticker={(id) => {
+              setSelectedStickerId(id);
+              if (id) setTab("sticker");
+            }}
+          />
           <p className="mt-2 text-center text-[11px] font-semibold text-purple-900/60">
-            👉 Ketuk emoji di bawah, lalu <strong>tahan dan geser stiker di foto</strong> — area sentuhnya sudah diperbesar.
+            Ketuk stiker di foto untuk memilih, lalu atur ukuran di bawah.
           </p>
         </div>
 
-        {/* Mascot Info */}
+        {selected ? (
+          <div className="space-y-3 rounded-3xl glass-card p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-xs font-bold text-purple-950">
+                <span className="text-2xl leading-none">{selected.emoji}</span>
+                Ukuran stiker
+              </p>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700"
+                onClick={() => {
+                  removeSticker(selected.id);
+                  setSelectedStickerId(null);
+                }}
+              >
+                <Trash2 size={12} /> Hapus
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Perkecil"
+                className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white text-purple-800 shadow-sm ring-1 ring-purple-100 disabled:opacity-40"
+                onClick={() => setScale(selected.scale - SCALE_STEP)}
+                disabled={selected.scale <= MIN_SCALE}
+              >
+                <Minus size={16} />
+              </button>
+              <input
+                type="range"
+                min={MIN_SCALE}
+                max={MAX_SCALE}
+                step={SCALE_STEP}
+                value={selected.scale}
+                onChange={(event) => setScale(Number(event.target.value))}
+                className="h-2 w-full cursor-pointer accent-violet-600"
+                aria-label="Slider ukuran stiker"
+              />
+              <button
+                type="button"
+                aria-label="Perbesar"
+                className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white text-purple-800 shadow-sm ring-1 ring-purple-100 disabled:opacity-40"
+                onClick={() => setScale(selected.scale + SCALE_STEP)}
+                disabled={selected.scale >= MAX_SCALE}
+              >
+                <Plus size={16} />
+              </button>
+              <span className="w-12 shrink-0 text-center text-xs font-bold text-purple-800">
+                {Math.round(selected.scale * 100)}%
+              </span>
+            </div>
+          </div>
+        ) : null}
+
         <div className="rounded-3xl glass-card p-4">
           <CuteMascot expression="love" speech="Hias foto kamu sesuka hati! ✨" />
         </div>
 
-        {/* Tab Selectors */}
         <div className="flex gap-2">
           {(
             [
@@ -73,12 +157,11 @@ export function CustomizeScreen() {
           ))}
         </div>
 
-        {/* Filter Tab */}
         {tab === "filter" ? (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl glass-card p-4 space-y-2.5"
+            className="space-y-2.5 rounded-3xl glass-card p-4"
           >
             <p className="text-xs font-bold text-purple-950">Pilih Filter Warna:</p>
             <div className="flex flex-wrap gap-2">
@@ -98,7 +181,6 @@ export function CustomizeScreen() {
           </motion.div>
         ) : null}
 
-        {/* Sticker Tab */}
         {tab === "sticker" ? (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
@@ -106,8 +188,10 @@ export function CustomizeScreen() {
             className="rounded-3xl glass-card p-4"
           >
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold text-purple-950">Ketuk emoji untuk menempel stiker:</p>
-              <span className="text-[11px] text-purple-800/60 font-semibold">{stickerHistory.length} stiker terpasang</span>
+              <p className="text-xs font-bold text-purple-950">Ketuk emoji untuk menempel:</p>
+              <span className="text-[11px] font-semibold text-purple-800/60">
+                {stickers.length} stiker
+              </span>
             </div>
 
             <div className="mt-3 grid grid-cols-6 gap-2.5 sm:grid-cols-8">
@@ -117,17 +201,19 @@ export function CustomizeScreen() {
                   whileHover={{ scale: 1.2, rotate: 5 }}
                   whileTap={{ scale: 0.85 }}
                   type="button"
-                  className="grid size-11 place-items-center rounded-2xl bg-white/90 text-2xl shadow-xs border border-purple-100 hover:bg-white"
-                  onClick={() =>
+                  className="grid size-11 place-items-center rounded-2xl border border-purple-100 bg-white/90 text-2xl shadow-xs hover:bg-white"
+                  onClick={() => {
+                    const id = crypto.randomUUID();
                     addSticker({
-                      id: crypto.randomUUID(),
+                      id,
                       emoji,
-                    x: 0.35 + Math.random() * 0.3,
-                    y: 0.3 + Math.random() * 0.4,
+                      x: 0.35 + Math.random() * 0.3,
+                      y: 0.3 + Math.random() * 0.4,
                       scale: 1,
                       rotation: 0,
-                    })
-                  }
+                    });
+                    setSelectedStickerId(id);
+                  }}
                 >
                   {emoji}
                 </motion.button>
@@ -136,12 +222,11 @@ export function CustomizeScreen() {
           </motion.div>
         ) : null}
 
-        {/* Text Tab */}
         {tab === "text" ? (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl glass-card p-4 space-y-4"
+            className="space-y-4 rounded-3xl glass-card p-4"
           >
             <div>
               <label className="block text-xs font-bold text-purple-950">
@@ -156,26 +241,28 @@ export function CustomizeScreen() {
               />
             </div>
 
-            <label className="flex items-center gap-2.5 text-xs font-bold text-purple-950 cursor-pointer select-none">
+            <label className="flex cursor-pointer select-none items-center gap-2.5 text-xs font-bold text-purple-950">
               <input
                 type="checkbox"
                 checked={showDate}
                 onChange={toggleDate}
-                className="size-4 rounded-md accent-purple-600 cursor-pointer"
+                className="size-4 cursor-pointer rounded-md accent-purple-600"
               />
               Tampilkan tanggal otomatis di bagian bawah bingkai 📅
             </label>
           </motion.div>
         ) : null}
 
-        {/* Undo & Reset Controls */}
         <div className="flex gap-2.5">
           <Button
             variant="secondary"
             className="flex-1 py-3 text-xs"
             icon={<Undo2 size={16} />}
             disabled={!stickerHistory.length}
-            onClick={undoSticker}
+            onClick={() => {
+              undoSticker();
+              setSelectedStickerId(null);
+            }}
           >
             Undo Stiker ({stickerHistory.length})
           </Button>
@@ -183,7 +270,10 @@ export function CustomizeScreen() {
             variant="ghost"
             className="flex-1 py-3 text-xs"
             icon={<RotateCcw size={16} />}
-            onClick={resetCustomize}
+            onClick={() => {
+              resetCustomize();
+              setSelectedStickerId(null);
+            }}
           >
             Reset Semua Hiasan
           </Button>

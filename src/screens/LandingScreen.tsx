@@ -1,206 +1,416 @@
 import { CuteMascot } from "@/components/CuteMascot";
-import { FloatingParticles } from "@/components/FloatingParticles";
 import { Button } from "@/components/ui/Button";
 import { frames } from "@/data/frames";
 import { layouts } from "@/data/layouts";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
-import { Camera, Heart, Sparkles, ShieldCheck, Wand2, Frame, Download } from "lucide-react";
+import { Camera, ShieldCheck } from "lucide-react";
 
-const samples = [
-  { name: "Cute Strip", theme: "Strip 4 Slot", tag: "Populer 🔥", colors: ["#F472B6", "#DDD6FE", "#C4B5FD", "#FCE7F3"] },
-  { name: "Grid Pastel", theme: "Grid 4 Box", tag: "Aesthetic ✨", colors: ["#7C3AED", "#A78BFA", "#C4B5FD", "#F3E8FF"] },
-  { name: "Neon Night", theme: "Vintage 3", tag: "Keren 😎", colors: ["#1E1B4B", "#8B5CF6", "#EC4899", "#38BDF8"] },
+const strips = [
+  {
+    name: "Violet Soft",
+    bg: "#EDE9FE",
+    accent: "#7C3AED",
+    faces: ["😺", "✨", "🌸", "😸"],
+    slots: ["#C4B5FD", "#A78BFA", "#8B5CF6", "#DDD6FE"],
+  },
+  {
+    name: "Kitty Pop",
+    bg: "#FFF0F5",
+    accent: "#EC4899",
+    faces: ["😻", "🎀", "💕", "🐱"],
+    slots: ["#F9A8D4", "#F472B6", "#FBCFE8", "#FCE7F3"],
+  },
+  {
+    name: "Neon Cute",
+    bg: "#1A1030",
+    accent: "#E9D5FF",
+    faces: ["😎", "⭐", "🌙", "💫"],
+    slots: ["#4C1D95", "#7C3AED", "#A78BFA", "#312E81"],
+  },
+];
+
+const floaties = [
+  { emoji: "✨", x: "8%", y: "18%", delay: 0 },
+  { emoji: "💖", x: "88%", y: "22%", delay: 0.4 },
+  { emoji: "🌸", x: "12%", y: "72%", delay: 0.8 },
+  { emoji: "🐱", x: "90%", y: "68%", delay: 1.2 },
+  { emoji: "⭐", x: "78%", y: "48%", delay: 0.2 },
+  { emoji: "🫧", x: "5%", y: "42%", delay: 1 },
 ];
 
 export function LandingScreen() {
   const setStep = useSession((s) => s.setStep);
 
+  function start(): void {
+    track("start_click");
+    setStep("permission");
+  }
+
   return (
-    <div className="relative min-h-dvh bg-app text-purple-950 overflow-hidden">
-      <FloatingParticles count={16} />
-
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-4xl flex-col px-5 pb-12 pt-6 sm:px-8">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -15 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
+    <div className="relative min-h-dvh overflow-x-hidden bg-app text-ink">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute -left-24 top-10 size-72 rounded-full bg-violet-400/30 blur-3xl"
+          animate={{ x: [0, 20, 0], y: [0, 14, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -right-16 top-32 size-80 rounded-full bg-pink-300/25 blur-3xl"
+          animate={{ x: [0, -18, 0], y: [0, 22, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        {floaties.map((item) => (
+          <motion.span
+            key={`${item.emoji}-${item.x}`}
+            className="absolute text-xl opacity-50 sm:text-2xl"
+            style={{ left: item.x, top: item.y }}
+            animate={{ y: [0, -12, 0], rotate: [0, 12, -8, 0], scale: [1, 1.12, 1] }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: item.delay,
+            }}
           >
-            <span className="flex size-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-pink-500 text-white font-black text-lg shadow-md">
-              S
-            </span>
-            <span className="font-display text-2xl font-bold tracking-tight text-gradient-purple">
-              Snapie
-            </span>
-          </motion.div>
+            {item.emoji}
+          </motion.span>
+        ))}
+      </div>
 
-          <motion.button
-            initial={{ opacity: 0, x: 15 }}
-            animate={{ opacity: 1, x: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-5 pb-10 pt-5 sm:px-8 sm:pt-6">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="grid size-9 place-items-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-500 text-sm shadow-md">
+              📸
+            </span>
+            <p className="font-display text-xl font-extrabold tracking-tight text-heart">
+              Snapie
+            </p>
+          </div>
+          <button
             type="button"
-            className="rounded-full bg-white/80 px-4 py-1.5 text-xs font-semibold text-purple-900 shadow-xs border border-purple-100 hover:bg-white"
+            className="rounded-full bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-ink-soft shadow-sm transition hover:text-heart"
             onClick={() => setStep("privacy")}
           >
-            🔒 Privasi 100% Aman
-          </motion.button>
+            🔒 Privasi
+          </button>
         </header>
 
-        {/* Hero Section */}
-        <section className="mt-8 text-center sm:mt-12">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-white/80 px-4 py-1.5 text-xs font-bold text-violet-700 shadow-xs backdrop-blur-md"
-          >
-            <Heart size={14} className="fill-pink-500 text-pink-500 animate-pulse" />
-            <span>Photobooth Online Instan & Gratis</span>
-            <Sparkles size={14} className="text-amber-400" />
-          </motion.div>
+        {/* Hero */}
+        <section className="mt-7 flex flex-1 flex-col items-center text-center lg:mt-8 lg:grid lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-10 lg:text-left">
+          <div className="w-full max-w-xl lg:max-w-none">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-center lg:justify-start"
+            >
+              <CuteMascot
+                expression="excited"
+                speech="Yuk bikin foto strip gemoy bareng! ✨"
+              />
+            </motion.div>
 
-          {/* Mascot Header */}
-          <div className="mt-6 flex justify-center">
-            <CuteMascot expression="excited" speech="Yuk jepret foto strip lucu & aesthetic bareng! 📸✨" />
+            <motion.p
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.05 }}
+              className="mt-5 font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+            >
+              <span className="text-heart">Snap</span>
+              <span className="text-gradient-purple">ie</span>
+              <motion.span
+                className="ml-1 inline-block"
+                animate={{ rotate: [0, 14, -8, 0], y: [0, -4, 0] }}
+                transition={{ duration: 2.8, repeat: Infinity }}
+              >
+                💕
+              </motion.span>
+            </motion.p>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+              className="mt-4 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl"
+            >
+              Jepret. Bingkai.{" "}
+              <span className="text-gradient-purple">Gemoyin.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-soft sm:text-base lg:mx-0"
+            >
+              Photobooth online yang lucu & estetik. Tanpa aplikasi, tanpa akun —
+              fotomu aman di HP-mu sendiri.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+              className="mt-7 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
+            >
+              <Button
+                className="min-w-56 animate-pulse-glow px-8 py-3.5 text-base"
+                icon={<Camera size={20} />}
+                onClick={start}
+              >
+                Mulai Foto Yuk ✨
+              </Button>
+              <p className="flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+                <ShieldCheck size={14} className="text-emerald-500" />
+                Tidak diunggah ke server
+              </p>
+            </motion.div>
           </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mt-6 font-display text-4xl font-extrabold leading-tight text-slate-900 sm:text-6xl"
-          >
-            Jepret. Bingkai. <br className="hidden sm:inline" />
-            <span className="text-gradient-purple">Abadikan Momen.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-purple-900/70 sm:text-base"
-          >
-            Buat foto strip gemoy & estetik langsung dari browsermu. Gratis, tanpa aplikasi, tanpa daftar akun, dan fotomu <strong>tidak pernah diunggah ke server</strong>.
-          </motion.p>
-
+          {/* Strip showcase with stickers */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14, duration: 0.5 }}
+            className="relative mt-10 w-full max-w-md lg:mt-0 lg:ml-auto"
           >
-            <Button
-              variant="primary"
-              className="min-w-60 text-lg py-4 animate-pulse-glow"
-              icon={<Camera size={22} className="animate-bounce" />}
-              onClick={() => {
-                track("start_click");
-                setStep("permission");
-              }}
+            <div className="absolute -inset-8 rounded-[2.5rem] bg-gradient-to-br from-violet-400/35 via-pink-300/25 to-amber-200/20 blur-2xl" />
+
+            <motion.span
+              className="absolute -left-1 top-6 z-20 text-3xl sm:left-2"
+              animate={{ y: [0, -10, 0], rotate: [-8, 8, -8] }}
+              transition={{ duration: 3.2, repeat: Infinity }}
             >
-              Mulai Foto Sekarang
-            </Button>
+              🎀
+            </motion.span>
+            <motion.span
+              className="absolute -right-1 top-16 z-20 text-2xl sm:right-4"
+              animate={{ y: [0, 8, 0], scale: [1, 1.15, 1] }}
+              transition={{ duration: 2.6, repeat: Infinity, delay: 0.3 }}
+            >
+              ✨
+            </motion.span>
+            <motion.span
+              className="absolute bottom-8 left-0 z-20 text-2xl sm:left-6"
+              animate={{ rotate: [0, 15, 0] }}
+              transition={{ duration: 3.8, repeat: Infinity }}
+            >
+              🐱
+            </motion.span>
+
+            <motion.div
+              className="relative mx-auto flex w-[min(100%,300px)] justify-center gap-3 sm:w-[340px] sm:gap-4"
+              animate={{ y: [0, -7, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <StripCard strip={strips[0]} tilt={-7} delay={0} />
+              <StripCard strip={strips[1]} tilt={3} delay={0.08} featured />
+              <StripCard strip={strips[2]} tilt={-4} delay={0.16} className="hidden sm:flex" />
+            </motion.div>
           </motion.div>
         </section>
 
-        {/* Sample Showcase */}
-        <section className="mt-12" aria-label="Contoh hasil foto strip">
-          <div className="flex items-center justify-between px-1">
-            <p className="font-display text-lg font-bold text-purple-950 flex items-center gap-1.5">
-              <span>🎨</span> Pilihan Layout & Bingkai Viral
-            </p>
-            <span className="text-xs text-purple-700/70">Geser untuk lihat &rarr;</span>
-          </div>
+        {/* Steps */}
+        <section className="mt-14 sm:mt-16" aria-labelledby="how-title">
+          <h2 id="how-title" className="text-center font-display text-2xl font-extrabold text-ink sm:text-left">
+            Gampang banget! 🎉
+          </h2>
+          <p className="mt-1 text-center text-sm text-ink-soft sm:text-left">
+            Dari buka kamera sampai unduh, biasanya di bawah 2 menit.
+          </p>
 
-          <div className="mt-3 flex gap-4 overflow-x-auto pb-4 pt-1 no-scrollbar">
-            {samples.map((sample, index) => (
-              <motion.article
-                key={sample.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index + 0.25 }}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="w-44 shrink-0 rounded-3xl glass-card p-3.5 shadow-md relative"
+          <ol className="mt-6 grid gap-4 sm:grid-cols-3 sm:gap-5">
+            {[
+              {
+                n: "1",
+                emoji: "🖼️",
+                title: "Pilih layout",
+                body: "Strip, grid, atau polaroid — sesuaikan mood.",
+                tint: "from-violet-100 to-purple-50",
+              },
+              {
+                n: "2",
+                emoji: "📸",
+                title: "Jepret & hias",
+                body: "Countdown lucu, filter, stiker, bingkai kucing!",
+                tint: "from-pink-100 to-rose-50",
+              },
+              {
+                n: "3",
+                emoji: "💾",
+                title: "Unduh & bagikan",
+                body: "PNG/JPG tajam, siap dipamerin ke story.",
+                tint: "from-amber-50 to-orange-50",
+              },
+            ].map((step, i) => (
+              <motion.li
+                key={step.n}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ delay: i * 0.07 }}
+                whileHover={{ y: -4, rotate: i === 1 ? 1 : -1 }}
+                className={`rounded-3xl bg-gradient-to-br ${step.tint} p-5 shadow-sm ring-1 ring-white/80`}
               >
-                <span className="absolute -top-2 -right-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                  {sample.tag}
-                </span>
-
-                <div className="flex flex-col gap-2 rounded-2xl bg-slate-950/5 p-2 border border-white/60">
-                  {sample.colors.map((color, i) => (
-                    <div
-                      key={`${sample.name}-${i}`}
-                      className="h-14 w-full rounded-xl shadow-xs transition-transform hover:scale-[1.02]"
-                      style={{ background: color }}
-                    />
-                  ))}
+                <div className="flex items-center gap-3">
+                  <span className="grid size-11 place-items-center rounded-2xl bg-white text-xl shadow-sm">
+                    {step.emoji}
+                  </span>
+                  <span className="font-display text-2xl font-black text-heart/40">
+                    {step.n}
+                  </span>
                 </div>
+                <p className="mt-3 font-display text-lg font-bold text-ink">{step.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft">{step.body}</p>
+              </motion.li>
+            ))}
+          </ol>
+        </section>
 
-                <div className="mt-2.5 text-center">
-                  <p className="font-display text-sm font-bold text-purple-950">{sample.name}</p>
-                  <p className="text-[11px] text-purple-700/60">{sample.theme}</p>
+        {/* Themes */}
+        <section className="mt-14 sm:mt-16" aria-labelledby="themes-title">
+          <h2 id="themes-title" className="text-center font-display text-2xl font-extrabold text-ink sm:text-left">
+            Pilih vibe-mu ✨
+          </h2>
+          <p className="mt-1 text-center text-sm text-ink-soft sm:text-left">
+            {frames.length} bingkai: lucu, kucing, romantis, sampai yang edgy.
+          </p>
+
+          <div className="mt-5 flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible">
+            {[
+              { label: "Lucu", blurb: "Bear & candy", from: "#E9D5FF", to: "#F5F3FF", mark: "🧸" },
+              { label: "Kucing", blurb: "Meow mode", from: "#FBCFE8", to: "#FFF7ED", mark: "🐱" },
+              { label: "Romantis", blurb: "Date night", from: "#FCE7F3", to: "#FDF2F8", mark: "💕" },
+              { label: "Keren", blurb: "Neon vibes", from: "#1E1B4B", to: "#4C1D95", mark: "😎", dark: true },
+            ].map((theme, i) => (
+              <motion.div
+                key={theme.label}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                whileHover={{ scale: 1.04, y: -3 }}
+                className="flex h-32 w-40 shrink-0 flex-col justify-between rounded-3xl p-4 shadow-md sm:h-36 sm:w-auto"
+                style={{
+                  background: `linear-gradient(145deg, ${theme.from}, ${theme.to})`,
+                }}
+              >
+                <motion.span
+                  className="text-3xl"
+                  animate={{ rotate: [0, 8, -6, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, delay: i * 0.2 }}
+                >
+                  {theme.mark}
+                </motion.span>
+                <div>
+                  <p
+                    className={`font-display text-lg font-bold ${
+                      theme.dark ? "text-white" : "text-ink"
+                    }`}
+                  >
+                    {theme.label}
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      theme.dark ? "text-white/70" : "text-ink-soft"
+                    }`}
+                  >
+                    {theme.blurb}
+                  </p>
                 </div>
-              </motion.article>
+              </motion.div>
             ))}
           </div>
         </section>
 
-        {/* 3 Step Process Cards */}
-        <section className="mt-10 grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              n: "1",
-              icon: <Frame size={20} className="text-violet-600" />,
-              t: "Pilih Layout",
-              d: "Tersedia format Strip 4, Grid, Wide, dan Polaroid cute.",
-            },
-            {
-              n: "2",
-              icon: <Wand2 size={20} className="text-pink-500" />,
-              t: "Jepret & Hias",
-              d: "Hitung mundur otomatis, filter vintage, & stiker emoji gemes.",
-            },
-            {
-              n: "3",
-              icon: <Download size={20} className="text-purple-600" />,
-              t: "Unduh HD",
-              d: "Simpan dalam format PNG / JPG high quality atau cetak 4R.",
-            },
-          ].map((step, idx) => (
-            <motion.div
-              key={step.n}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + idx * 0.1 }}
-              whileHover={{ y: -4 }}
-              className="rounded-3xl glass-card p-5 glass-card-hover"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-display text-3xl font-black text-gradient-purple">{step.n}</span>
-                <div className="flex size-10 items-center justify-center rounded-2xl bg-purple-100/80 shadow-inner">
-                  {step.icon}
-                </div>
-              </div>
-              <p className="mt-3 font-display text-lg font-bold text-purple-950">{step.t}</p>
-              <p className="mt-1 text-xs leading-relaxed text-purple-900/70">{step.d}</p>
-            </motion.div>
-          ))}
+        {/* Bottom CTA */}
+        <section className="relative mt-14 overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 px-6 py-11 text-center text-white shadow-[0_20px_50px_-12px_rgba(236,72,153,0.4)] sm:mt-16 sm:px-10">
+          <motion.span
+            className="pointer-events-none absolute left-6 top-5 text-3xl opacity-80"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity }}
+          >
+            🥳
+          </motion.span>
+          <motion.span
+            className="pointer-events-none absolute right-8 bottom-6 text-3xl opacity-80"
+            animate={{ rotate: [0, 12, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            🎉
+          </motion.span>
+
+          <p className="font-display text-2xl font-extrabold sm:text-3xl">
+            Siap jadi bintang photobooth?
+          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-white/90">
+            {layouts.length} layout · {frames.length} bingkai · hasil HD siap share
+          </p>
+          <Button
+            variant="secondary"
+            className="mt-6 min-w-52 border-0 bg-white text-heart hover:bg-pink-50"
+            icon={<Camera size={18} />}
+            onClick={start}
+          >
+            Mulai Foto Sekarang
+          </Button>
         </section>
 
-        {/* Footer Badges */}
-        <footer className="mt-12 border-t border-purple-200/50 pt-6 text-center">
-          <p className="flex items-center justify-center gap-2 text-xs font-medium text-purple-900/70">
-            <ShieldCheck size={16} className="text-emerald-500" />
-            <span>Diproses 100% di browser-mu · Bebas Iklan · Tanpa Server Upload</span>
-          </p>
-          <p className="mt-2 text-xs text-purple-700/50">
-            {layouts.length} pilihan layout · {frames.length} bingkai lucu, kucing, romantis & keren ✨
-          </p>
+        <footer className="mt-8 pb-2 text-center text-xs text-ink-soft">
+          🛡️ Fotomu tidak diunggah. Diproses 100% di browser.
         </footer>
       </div>
     </div>
+  );
+}
+
+function StripCard({
+  strip,
+  tilt,
+  delay,
+  featured,
+  className = "",
+}: {
+  strip: (typeof strips)[number];
+  tilt: number;
+  delay: number;
+  featured?: boolean;
+  className?: string;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 + delay, type: "spring", stiffness: 160 }}
+      whileHover={{ y: -6 }}
+      className={`flex w-[96px] flex-col gap-1.5 rounded-[1.25rem] p-2.5 sm:w-[112px] ${
+        featured ? "z-10" : "opacity-95"
+      } ${className}`}
+      style={{
+        background: strip.bg,
+        transform: `rotate(${tilt}deg) scale(${featured ? 1.08 : 1})`,
+        boxShadow: featured
+          ? "0 24px 48px -10px rgba(236,72,153,0.35)"
+          : "0 16px 32px -12px rgba(42,24,72,0.18)",
+      }}
+    >
+      {strip.slots.map((color, i) => (
+        <div
+          key={`${strip.name}-${i}`}
+          className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl"
+          style={{ background: color }}
+        >
+          <span className="text-lg drop-shadow-sm sm:text-xl">{strip.faces[i]}</span>
+        </div>
+      ))}
+      <p
+        className="pt-1 text-center font-display text-[10px] font-bold"
+        style={{ color: strip.accent }}
+      >
+        {strip.name}
+      </p>
+    </motion.article>
   );
 }

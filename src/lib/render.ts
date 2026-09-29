@@ -1,6 +1,32 @@
 import { applyPhotoFilter } from "@/lib/colorFilter";
 import type { FilterId, FrameStyle, Layout, Photo, PlacedSticker } from "@/types";
-import { drawDecorations, drawSlotOrnaments, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
+
+/** Base emoji size in layout canvas units at scale = 1. */
+export const STICKER_BASE_SIZE = 64;
+
+const STICKER_FONT =
+  '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+
+/** Draw stickers in layout canvas coordinates (same path for preview + export). */
+export function drawStickers(
+  ctx: CanvasRenderingContext2D,
+  stickers: PlacedSticker[],
+  canvasW: number,
+  canvasH: number,
+): void {
+  stickers.forEach((sticker) => {
+    ctx.save();
+    ctx.translate(sticker.x * canvasW, sticker.y * canvasH);
+    ctx.rotate((sticker.rotation * Math.PI) / 180);
+    const size = Math.max(1, Math.round(STICKER_BASE_SIZE * sticker.scale));
+    ctx.font = `${size}px ${STICKER_FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(sticker.emoji, 0, 0);
+    ctx.restore();
+  });
+}
 
 const imageCache = new Map<string, HTMLImageElement>();
 
@@ -93,26 +119,40 @@ export async function renderCollage(
   layout.slots.forEach((slot, index) => {
     const img = filtered[index];
     const photo = photos[index];
+
+    // Polaroid / booth matte
     ctx.save();
-    ctx.shadowColor = "rgba(42, 24, 72, 0.18)";
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 6;
     roundedRect(
       ctx,
-      slot.x - 7,
-      slot.y - 7,
-      slot.w + 14,
-      slot.h + 14,
-      slot.radius + 8,
+      slot.x - 10,
+      slot.y - 10,
+      slot.w + 20,
+      slot.h + 20,
+      Math.max(slot.radius + 6, 12),
     );
     ctx.fillStyle = frame.mat || "#ffffff";
     ctx.fill();
     ctx.restore();
 
+    // Soft matte edge
+    ctx.save();
+    ctx.strokeStyle = "rgba(42,24,72,0.08)";
+    ctx.lineWidth = 1;
+    roundedRect(
+      ctx,
+      slot.x - 10.5,
+      slot.y - 10.5,
+      slot.w + 21,
+      slot.h + 21,
+      Math.max(slot.radius + 6, 12),
+    );
+    ctx.stroke();
+    ctx.restore();
+
     ctx.save();
     roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
     ctx.clip();
-    ctx.fillStyle = "#ddd0d6";
+    ctx.fillStyle = "#e8e0ea";
     ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
     if (img && photo) {
       drawCover(
@@ -128,10 +168,16 @@ export async function renderCollage(
       );
     }
     ctx.restore();
+
+    // Clean studio rim on photo
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.45)";
-    ctx.lineWidth = 2.5;
-    roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
+    ctx.strokeStyle = "rgba(255,255,255,0.65)";
+    ctx.lineWidth = 2;
+    roundedRect(ctx, slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2, Math.max(0, slot.radius - 1));
+    ctx.stroke();
+    ctx.strokeStyle = `${frame.accent}33`;
+    ctx.lineWidth = 1.5;
+    roundedRect(ctx, slot.x - 1, slot.y - 1, slot.w + 2, slot.h + 2, slot.radius + 1);
     ctx.stroke();
     ctx.restore();
   });
@@ -171,7 +217,7 @@ export async function renderCollage(
   );
   ctx.restore();
 
-  drawSlotOrnaments(ctx, frame.decoration, layout.slots, frame.accent);
+  // Ornamen hanya di margin (sudah di-clip); slot ornaments di atas foto dihapus agar tidak menutupi wajah
 
   const area = layout.captionArea;
   if (area.h > 0) {
@@ -198,19 +244,7 @@ export async function renderCollage(
   }
 
   if (includeStickers) {
-    stickers.forEach((sticker) => {
-      ctx.save();
-      ctx.translate(
-        sticker.x * layout.canvas.width,
-        sticker.y * layout.canvas.height,
-      );
-      ctx.rotate((sticker.rotation * Math.PI) / 180);
-      ctx.font = `${Math.round(64 * sticker.scale)}px serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(sticker.emoji, 0, 0);
-      ctx.restore();
-    });
+    drawStickers(ctx, stickers, layout.canvas.width, layout.canvas.height);
   }
 
   if (watermark) {

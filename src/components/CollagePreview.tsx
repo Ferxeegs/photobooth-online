@@ -1,24 +1,38 @@
 import { getFrame } from "@/data/frames";
 import { getLayout } from "@/data/layouts";
-import { renderCollage } from "@/lib/render";
+import { drawStickers, renderCollage, STICKER_BASE_SIZE } from "@/lib/render";
 import { useSession } from "@/store/session";
 import type { PlacedSticker } from "@/types";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 
 interface Props {
   className?: string;
   maxHeight?: number;
   interactive?: boolean;
+  selectedStickerId?: string | null;
+  onSelectSticker?: (id: string | null) => void;
 }
 
 export function CollagePreview({
   className = "",
   maxHeight = 520,
   interactive = false,
+  selectedStickerId = null,
+  onSelectSticker,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stickerCanvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const livePositions = useRef(new Map<string, { x: number; y: number }>());
+  const stickersRef = useRef<PlacedSticker[]>([]);
   const [busy, setBusy] = useState(true);
+  const [wrapWidth, setWrapWidth] = useState(0);
   const {
     layoutId,
     photos,
@@ -32,13 +46,40 @@ export function CollagePreview({
     updateSticker,
   } = useSession();
 
-  const stickerBakeKey = interactive
-    ? "overlay"
-    : stickers.map((item) => `${item.id}:${item.x}:${item.y}:${item.scale}`).join("|");
+  const layout = getLayout(layoutId);
+  stickersRef.current = stickers;
 
+  const stickerKey = stickers
+    .map((item) => `${item.id}:${item.x}:${item.y}:${item.scale}:${item.rotation}:${item.emoji}`)
+    .join("|");
+
+  const paintStickers = () => {
+    const canvas = stickerCanvasRef.current;
+    if (!canvas || !interactive) return;
+    const { width: cw, height: ch } = layout.canvas;
+    if (canvas.width !== cw || canvas.height !== ch) {
+      canvas.width = cw;
+      canvas.height = ch;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, cw, ch);
+    const merged = stickersRef.current.map((sticker) => {
+      const live = livePositions.current.get(sticker.id);
+      return live ? { ...sticker, x: live.x, y: live.y } : sticker;
+    });
+    drawStickers(ctx, merged, cw, ch);
+  };
+
+  const paintStickersRef = useRef(paintStickers);
+  paintStickersRef.current = paintStickers;
+  const requestPaint = useRef(() => {
+    paintStickersRef.current();
+  }).current;
+
+  // Base collage — stickers only baked when not interactive
   useEffect(() => {
     let cancelled = false;
-    const layout = getLayout(layoutId);
     const frame = getFrame(frameId);
     const displayScale = Math.min(
       1,
@@ -66,10 +107,13 @@ export function CollagePreview({
       const ctx = target.getContext("2d");
       ctx?.drawImage(offscreen, 0, 0);
       setBusy(false);
+      paintStickersRef.current();
     });
     return () => {
       cancelled = true;
     };
+    // stickerKey only matters when baking into base canvas
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     layoutId,
     photos,
@@ -80,35 +124,67 @@ export function CollagePreview({
     showDate,
     watermark,
     interactive,
-    stickerBakeKey,
+    interactive ? "" : stickerKey,
   ]);
 
-  const layout = getLayout(layoutId);
+  useLayoutEffect(() => {
+    paintStickers();
+  }, [interactive, stickerKey, layout.canvas.width, layout.canvas.height]);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      setWrapWidth(entries[0]?.contentRect.width ?? 0);
+    });
+    ro.observe(el);
+    setWrapWidth(el.getBoundingClientRect().width);
+    return () => ro.disconnect();
+  }, [layoutId]);
+
+  const canvasAspect = layout.canvas.width / layout.canvas.height;
+  // Cap width so height never exceeds maxHeight (avoids squashed strip previews)
+  const widthCapPx = Math.min(420, maxHeight * canvasAspect);
 
   return (
     <div
       ref={wrapRef}
       className={`relative mx-auto overflow-hidden rounded-3xl bg-white shadow-lg ${className}`}
       style={{
-        width: "min(100%, 420px)",
-        maxHeight,
+        width: `min(100%, ${widthCapPx}px)`,
         aspectRatio: `${layout.canvas.width} / ${layout.canvas.height}`,
+        height: "auto",
         touchAction: interactive ? "none" : undefined,
+      }}
+      onPointerDown={() => {
+        if (interactive) onSelectSticker?.(null);
       }}
     >
       <canvas
         ref={canvasRef}
-        className="pointer-events-none block h-full w-full object-contain"
-        style={{ maxHeight }}
+        className="pointer-events-none absolute inset-0 block h-full w-full object-contain"
         aria-label="Pratinjau kolase"
       />
+      {interactive ? (
+        <canvas
+          ref={stickerCanvasRef}
+          className="pointer-events-none absolute inset-0 block h-full w-full object-contain"
+          aria-hidden
+        />
+      ) : null}
       {interactive
         ? stickers.map((sticker) => (
-            <DraggableSticker
+            <StickerHitTarget
               key={sticker.id}
               sticker={sticker}
+              selected={selectedStickerId === sticker.id}
+              canvasWidth={layout.canvas.width}
+              wrapWidth={wrapWidth}
               wrapRef={wrapRef}
+              livePositions={livePositions}
+              onPaint={requestPaint}
               onMove={updateSticker}
+              onSelect={() => onSelectSticker?.(sticker.id)}
             />
           ))
         : null}
@@ -121,21 +197,41 @@ export function CollagePreview({
   );
 }
 
-function DraggableSticker({
+function StickerHitTarget({
   sticker,
+  selected,
+  canvasWidth,
+  wrapWidth,
   wrapRef,
+  livePositions,
+  onPaint,
   onMove,
+  onSelect,
 }: {
   sticker: PlacedSticker;
+  selected: boolean;
+  canvasWidth: number;
+  wrapWidth: number;
   wrapRef: RefObject<HTMLDivElement | null>;
+  livePositions: RefObject<Map<string, { x: number; y: number }>>;
+  onPaint: () => void;
   onMove: (id: string, patch: Partial<PlacedSticker>) => void;
+  onSelect: () => void;
 }) {
   const nodeRef = useRef<HTMLButtonElement>(null);
   const drag = useRef<{
     pointerId: number;
     grabX: number;
     grabY: number;
+    moved: boolean;
+    x: number;
+    y: number;
   } | null>(null);
+
+  const sizePx =
+    wrapWidth > 0
+      ? Math.max(28, (STICKER_BASE_SIZE * sticker.scale * wrapWidth) / canvasWidth)
+      : Math.max(28, STICKER_BASE_SIZE * sticker.scale);
 
   useEffect(() => {
     const node = nodeRef.current;
@@ -144,46 +240,46 @@ function DraggableSticker({
     const onDown = (event: PointerEvent) => {
       event.preventDefault();
       event.stopPropagation();
+      onSelect();
       const box = wrapRef.current?.getBoundingClientRect();
-      if (!box) return;
+      if (!box || box.width <= 0 || box.height <= 0) return;
       drag.current = {
         pointerId: event.pointerId,
         grabX: (event.clientX - box.left) / box.width - sticker.x,
         grabY: (event.clientY - box.top) / box.height - sticker.y,
+        moved: false,
+        x: sticker.x,
+        y: sticker.y,
       };
       node.setPointerCapture(event.pointerId);
-      node.style.zIndex = "20";
-      node.style.transform = `translate(-50%, -50%) scale(${sticker.scale * 1.12}) rotate(${sticker.rotation}deg)`;
     };
 
     const onPointerMove = (event: PointerEvent) => {
       if (!drag.current || drag.current.pointerId !== event.pointerId) return;
       event.preventDefault();
+      drag.current.moved = true;
       const box = wrapRef.current?.getBoundingClientRect();
-      if (!box) return;
+      if (!box || box.width <= 0 || box.height <= 0) return;
       const x = clamp01((event.clientX - box.left) / box.width - drag.current.grabX);
       const y = clamp01((event.clientY - box.top) / box.height - drag.current.grabY);
+      drag.current.x = x;
+      drag.current.y = y;
       node.style.left = `${x * 100}%`;
       node.style.top = `${y * 100}%`;
+      livePositions.current?.set(sticker.id, { x, y });
+      onPaint();
     };
 
     const onPointerUp = (event: PointerEvent) => {
       if (!drag.current || drag.current.pointerId !== event.pointerId) return;
-      const box = wrapRef.current?.getBoundingClientRect();
-      if (box) {
-        const x = clamp01((event.clientX - box.left) / box.width - drag.current.grabX);
-        const y = clamp01((event.clientY - box.top) / box.height - drag.current.grabY);
-        onMove(sticker.id, { x, y });
-      }
+      const { moved, x, y } = drag.current;
       drag.current = null;
-      node.style.zIndex = "10";
-      node.style.transform = `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotation}deg)`;
+      livePositions.current?.delete(sticker.id);
+      if (moved) onMove(sticker.id, { x, y });
+      onPaint();
     };
 
-    const blockScroll = (event: TouchEvent) => {
-      event.preventDefault();
-    };
-
+    const blockScroll = (event: TouchEvent) => event.preventDefault();
     const preventMenu = (event: Event) => event.preventDefault();
 
     node.addEventListener("pointerdown", onDown);
@@ -200,27 +296,28 @@ function DraggableSticker({
       node.removeEventListener("contextmenu", preventMenu);
       node.removeEventListener("touchmove", blockScroll);
     };
-  }, [onMove, sticker.id, sticker.scale, sticker.rotation, sticker.x, sticker.y, wrapRef]);
+  }, [livePositions, onMove, onPaint, onSelect, sticker.id, sticker.x, sticker.y, wrapRef]);
 
   return (
     <button
       ref={nodeRef}
       type="button"
-      aria-label={`Geser stiker ${sticker.emoji}`}
-      className="absolute z-10 grid place-items-center rounded-full text-[42px] leading-none select-none"
+      aria-label={`Stiker ${sticker.emoji}${selected ? ", terpilih" : ""}`}
+      aria-pressed={selected}
+      className="absolute z-10 rounded-full border-0 bg-transparent p-0"
       style={{
         left: `${sticker.x * 100}%`,
         top: `${sticker.y * 100}%`,
-        width: 56,
-        height: 56,
-        transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
+        width: sizePx,
+        height: sizePx,
+        transform: "translate(-50%, -50%)",
         touchAction: "none",
-        WebkitUserSelect: "none",
-        userSelect: "none",
+        cursor: "grab",
+        background: "transparent",
+        boxShadow: selected ? "0 0 0 2px rgba(124,58,237,0.9)" : undefined,
+        zIndex: selected ? 15 : 10,
       }}
-    >
-      {sticker.emoji}
-    </button>
+    />
   );
 }
 

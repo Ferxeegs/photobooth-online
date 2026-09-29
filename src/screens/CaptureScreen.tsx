@@ -288,54 +288,50 @@ export function CaptureScreen() {
             className={`aspect-[4/3] h-full w-full object-cover ${mirrored ? "-scale-x-100" : ""}`}
           />
 
-          {/* Cute Viewfinder Corner Overlays */}
-          <div className="pointer-events-none absolute inset-4 border border-white/20 rounded-2xl flex flex-col justify-between p-3 select-none">
-            <div className="flex justify-between items-center">
-              <span className="flex items-center gap-1.5 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-xs">
-                <span className="size-2 rounded-full bg-red-500 animate-ping" /> LIVE
-              </span>
-              <span className="rounded-full bg-violet-600/90 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-xs">
+          {/* Viewfinder overlays */}
+          <div className="pointer-events-none absolute inset-3 z-30 flex flex-col justify-between rounded-2xl border border-white/20 p-2.5 select-none sm:inset-4 sm:p-3">
+            <div className="flex items-start justify-between gap-2">
+              <span className="rounded-full bg-violet-600/90 px-3 py-1 text-[11px] font-bold text-white shadow-xs backdrop-blur-md">
                 {currentSlot} / {needed} 📸
               </span>
+
+              {count !== null ? (
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={count}
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    className="grid min-w-12 place-items-center rounded-2xl bg-black/55 px-3.5 py-1.5 font-display text-4xl font-black leading-none text-white shadow-lg backdrop-blur-md [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:min-w-14 sm:text-5xl"
+                  >
+                    {count}
+                  </motion.span>
+                </AnimatePresence>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-bold text-white shadow-xs backdrop-blur-md">
+                  <span className="size-2 rounded-full bg-red-500 animate-ping" /> LIVE
+                </span>
+              )}
             </div>
 
-            {/* Pose suggestion ticker */}
-            <div className="text-center">
-              <motion.span
-                key={poseIndex}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-block rounded-full bg-purple-950/70 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-purple-200 border border-white/20 shadow-xs"
-              >
-                Ide Pose: {POSE_SUGGESTIONS[poseIndex]}
-              </motion.span>
-            </div>
+            {count === null ? (
+              <div className="text-center">
+                <motion.span
+                  key={poseIndex}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-block rounded-full border border-white/20 bg-purple-950/70 px-3.5 py-1 text-xs font-semibold text-purple-200 shadow-xs backdrop-blur-md"
+                >
+                  Ide Pose: {POSE_SUGGESTIONS[poseIndex]}
+                </motion.span>
+              </div>
+            ) : (
+              <div />
+            )}
           </div>
 
           {/* Shutter Flash */}
-          {flash ? <div className="absolute inset-0 bg-white z-40 transition-opacity" /> : null}
-
-          {/* Big Animated Countdown */}
-          <AnimatePresence>
-            {count !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.5 }}
-                key={count}
-                className="absolute inset-0 z-30 grid place-items-center bg-purple-950/30 backdrop-blur-xs select-none"
-              >
-                <div className="flex flex-col items-center">
-                  <span className="font-display text-8xl font-black text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)]">
-                    {count}
-                  </span>
-                  <span className="mt-2 text-sm font-bold text-pink-300 drop-shadow-md">
-                    SENYUM DULU YA! ✨
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {flash ? <div className="absolute inset-0 z-40 bg-white transition-opacity" /> : null}
 
           {!ready && !error ? (
             <div className="absolute inset-0 z-20 grid place-items-center bg-slate-900 text-xs font-bold text-purple-200">

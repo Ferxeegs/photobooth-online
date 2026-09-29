@@ -1,5 +1,3 @@
-import type { Slot } from "@/types";
-
 export function roundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -110,13 +108,29 @@ function scatter(
   let n = seed;
   for (let i = 0; i < count; i += 1) {
     n = (n * 16807) % 2147483647;
-    const x = (n / 2147483647) * w;
+    const side = Math.floor((n / 2147483647) * 4);
     n = (n * 16807) % 2147483647;
-    const y = (n / 2147483647) * h;
+    const pos = n / 2147483647;
     n = (n * 16807) % 2147483647;
-    const s = 0.6 + (n / 2147483647) * 0.9;
+    const s = 0.55 + (n / 2147483647) * 0.45;
     n = (n * 16807) % 2147483647;
     const r = (n / 2147483647) * Math.PI * 2;
+
+    let x = 0;
+    let y = 0;
+    if (side === 0) {
+      x = 24 + pos * (w - 48);
+      y = 20 + (i % 2) * 16;
+    } else if (side === 1) {
+      x = 24 + pos * (w - 48);
+      y = h - 20 - (i % 2) * 16;
+    } else if (side === 2) {
+      x = 18;
+      y = 60 + pos * (h - 120);
+    } else {
+      x = w - 18;
+      y = 60 + pos * (h - 120);
+    }
     out.push({ x, y, s, r });
   }
   return out;
@@ -131,14 +145,49 @@ function doubleFrame(
   radius = 28,
 ): void {
   ctx.save();
+  // Outer soft band
   ctx.strokeStyle = outer;
-  ctx.lineWidth = 16;
-  roundedRect(ctx, 12, 12, w - 24, h - 24, radius);
+  ctx.lineWidth = 18;
+  roundedRect(ctx, 9, 9, w - 18, h - 18, radius);
   ctx.stroke();
-  ctx.strokeStyle = inner;
+  // White / light separator
+  ctx.strokeStyle = "rgba(255,255,255,0.55)";
   ctx.lineWidth = 3;
-  roundedRect(ctx, 26, 26, w - 52, h - 52, radius - 6);
+  roundedRect(ctx, 18, 18, w - 36, h - 36, radius - 4);
   ctx.stroke();
+  // Thin accent inner
+  ctx.strokeStyle = inner;
+  ctx.lineWidth = 1.75;
+  roundedRect(ctx, 24, 24, w - 48, h - 48, radius - 8);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function cornerMotifs(
+  w: number,
+  h: number,
+  draw: (x: number, y: number, rot: number) => void,
+): void {
+  const inset = 36;
+  draw(inset, inset, 0);
+  draw(w - inset, inset, Math.PI / 2);
+  draw(w - inset, h - inset, Math.PI);
+  draw(inset, h - inset, -Math.PI / 2);
+}
+
+function brandMark(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  color: string,
+  label = "snapie",
+): void {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.55;
+  ctx.font = `600 ${Math.max(14, Math.round(w * 0.028))}px Poppins, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, w / 2, 34);
   ctx.restore();
 }
 
@@ -272,32 +321,6 @@ function drawCatFace(
   ctx.restore();
 }
 
-function drawFish(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  color: string,
-): void {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, size, size * 0.55, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(size * 0.7, 0);
-  ctx.lineTo(size * 1.25, -size * 0.45);
-  ctx.lineTo(size * 1.25, size * 0.45);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "#2A1848";
-  ctx.beginPath();
-  ctx.arc(-size * 0.35, -size * 0.08, size * 0.12, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
 export function drawDecorations(
   ctx: CanvasRenderingContext2D,
   kind: string,
@@ -370,103 +393,45 @@ export function drawDecorations(
   ctx.restore();
 }
 
-export function drawSlotOrnaments(
-  ctx: CanvasRenderingContext2D,
-  kind: string,
-  slots: Slot[],
-  accent: string,
-): void {
-  if (!slots.length) return;
-  const first = slots[0];
-  const last = slots[slots.length - 1];
-  if (!first || !last) return;
-
-  if (kind.startsWith("cats-")) {
-    const fur =
-      kind === "cats-cafe"
-        ? "#E8A05A"
-        : kind === "cats-calico"
-          ? "#F4D6C8"
-          : kind === "cats-moon"
-            ? "#E8E0F8"
-            : "#C4B5FD";
-    const ear =
-      kind === "cats-moon" ? "#7C3AED" : "#FFB6C8";
-    const nose = kind === "cats-cafe" ? "#E07A6A" : "#F472B6";
-    drawCatFace(ctx, first.x + 8, first.y - 2, 28, fur, ear, nose);
-    drawCatFace(
-      ctx,
-      last.x + last.w - 8,
-      last.y + last.h + 4,
-      26,
-      kind === "cats-calico" ? "#3A2A28" : fur,
-      ear,
-      nose,
-    );
-    drawBow(ctx, first.x + first.w - 10, first.y - 4, 16, accent);
-    return;
-  }
-
-  if (kind === "hearts" || kind === "roses" || kind === "letter") {
-    drawHeart(ctx, first.x + 6, first.y - 2, 18, accent);
-    drawHeart(ctx, last.x + last.w - 8, last.y + last.h + 6, 16, "#FF8AA3");
-  }
-  if (kind === "neon") {
-    ctx.save();
-    ctx.shadowColor = accent;
-    ctx.shadowBlur = 12;
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = 2.5;
-    slots.forEach((slot) => {
-      roundedRect(ctx, slot.x - 5, slot.y - 5, slot.w + 10, slot.h + 10, slot.radius + 4);
-      ctx.stroke();
-    });
-    ctx.restore();
-  }
-  if (kind === "bears") {
-    drawBow(ctx, first.x + first.w - 8, first.y - 2, 14, accent);
-  }
-}
-
 function drawBears(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFFAA", 32);
-  const items = scatter(8, w, h, 42);
-  items.forEach((item, i) => {
+  doubleFrame(ctx, w, h, accent, "#FFFFFFCC", 30);
+  brandMark(ctx, w, accent);
+  cornerMotifs(w, h, (x, y) => {
     ctx.save();
-    ctx.translate(item.x, item.y);
-    const size = 16 * item.s;
-    ctx.fillStyle = i % 2 === 0 ? "#F4C7A0" : "#F8F2EA";
+    ctx.translate(x, y);
+    const size = 13;
+    ctx.fillStyle = "#F4C7A0";
     ctx.beginPath();
-    ctx.arc(0, 4, size, 0, Math.PI * 2);
+    ctx.arc(0, 3, size, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(-size * 0.7, -size * 0.55, size * 0.38, 0, Math.PI * 2);
-    ctx.arc(size * 0.7, -size * 0.55, size * 0.38, 0, Math.PI * 2);
+    ctx.arc(-size * 0.7, -size * 0.5, size * 0.35, 0, Math.PI * 2);
+    ctx.arc(size * 0.7, -size * 0.5, size * 0.35, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = accent;
     ctx.beginPath();
-    ctx.arc(-size * 0.28, 2, size * 0.12, 0, Math.PI * 2);
-    ctx.arc(size * 0.28, 2, size * 0.12, 0, Math.PI * 2);
+    ctx.arc(-size * 0.25, 2, size * 0.1, 0, Math.PI * 2);
+    ctx.arc(size * 0.25, 2, size * 0.1, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   });
+  drawBow(ctx, w / 2, 52, 16, accent);
 }
 
 function drawClouds(ctx: CanvasRenderingContext2D, w: number, h: number): void {
-  doubleFrame(ctx, w, h, "#A8D8F0", "#FFFFFF", 36);
-  scatter(8, w, h, 99).forEach((item, i) => {
-    drawCloud(
-      ctx,
-      item.x,
-      item.y,
-      0.7 + item.s * 0.4,
-      i % 2 === 0 ? "#FFFFFF" : "#FFE8F4",
-    );
+  doubleFrame(ctx, w, h, "#7EC8E3", "#FFFFFF", 34);
+  brandMark(ctx, w, "#4A6A8A");
+  cornerMotifs(w, h, (x, y) => {
+    drawCloud(ctx, x - 18, y - 4, 0.7, "#FFFFFF");
+  });
+  scatter(6, w, h, 99).forEach((item, i) => {
+    if (item.y > 50 && item.y < h - 50) return;
+    drawCloud(ctx, item.x, item.y, 0.45 + item.s * 0.25, i % 2 ? "#FFE8F4" : "#FFFFFF");
   });
 }
 
@@ -476,16 +441,16 @@ function drawPixels(
   h: number,
   accent: string,
 ): void {
-  const size = 14;
-  const colors = [accent, "#7A5CFF", "#50E3C2", "#FFE37A", "#FF8A3D"];
-  for (let x = 10; x < w - 10; x += size * 2) {
-    pixelBlock(ctx, x, 10, size, colors[(x / size) % colors.length | 0]);
-    pixelBlock(ctx, x, h - 24, size, colors[(x / size + 2) % colors.length | 0]);
+  const size = 10;
+  const colors = [accent, "#7A5CFF", "#50E3C2", "#FFE37A"];
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(12, 12, w - 24, h - 24);
+  for (let x = 16; x < w - 16; x += size * 2) {
+    pixelBlock(ctx, x, 16, size, colors[(x / size) % colors.length | 0]);
+    pixelBlock(ctx, x, h - 26, size, colors[(x / size + 2) % colors.length | 0]);
   }
-  for (let y = 10; y < h - 10; y += size * 2) {
-    pixelBlock(ctx, 10, y, size, colors[(y / size) % colors.length | 0]);
-    pixelBlock(ctx, w - 24, y, size, colors[(y / size + 1) % colors.length | 0]);
-  }
+  brandMark(ctx, w, "#FFE37A", "PIXEL");
 }
 
 function drawStrawberry(
@@ -494,36 +459,22 @@ function drawStrawberry(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFFCC", 30);
-  scatter(10, w, h, 7).forEach((item) => {
+  doubleFrame(ctx, w, h, accent, "#FFFFFFDD", 28);
+  brandMark(ctx, w, "#C23B5A");
+  cornerMotifs(w, h, (x, y) => {
     ctx.save();
-    ctx.translate(item.x, item.y);
-    ctx.rotate(item.r);
+    ctx.translate(x, y);
     ctx.fillStyle = accent;
     ctx.beginPath();
-    ctx.moveTo(0, 16 * item.s);
-    ctx.bezierCurveTo(
-      -14 * item.s,
-      6 * item.s,
-      -10 * item.s,
-      -8 * item.s,
-      0,
-      -4 * item.s,
-    );
-    ctx.bezierCurveTo(
-      10 * item.s,
-      -8 * item.s,
-      14 * item.s,
-      6 * item.s,
-      0,
-      16 * item.s,
-    );
+    ctx.moveTo(0, 12);
+    ctx.bezierCurveTo(-10, 4, -8, -6, 0, -2);
+    ctx.bezierCurveTo(8, -6, 10, 4, 0, 12);
     ctx.fill();
     ctx.fillStyle = "#7BC67B";
     ctx.beginPath();
-    ctx.moveTo(-8 * item.s, -6 * item.s);
-    ctx.lineTo(0, -16 * item.s);
-    ctx.lineTo(8 * item.s, -6 * item.s);
+    ctx.moveTo(-5, -4);
+    ctx.lineTo(0, -11);
+    ctx.lineTo(5, -4);
     ctx.fill();
     ctx.restore();
   });
@@ -537,17 +488,16 @@ function drawCartoon(
 ): void {
   ctx.strokeStyle = "#2A1A10";
   ctx.lineWidth = 10;
-  roundedRect(ctx, 16, 16, w - 32, h - 32, 18);
+  roundedRect(ctx, 12, 12, w - 24, h - 24, 16);
   ctx.stroke();
   ctx.strokeStyle = accent;
-  ctx.lineWidth = 4;
-  ctx.setLineDash([12, 10]);
-  roundedRect(ctx, 32, 32, w - 64, h - 64, 14);
+  ctx.lineWidth = 3;
+  ctx.setLineDash([8, 7]);
+  roundedRect(ctx, 24, 24, w - 48, h - 48, 12);
   ctx.stroke();
   ctx.setLineDash([]);
-  scatter(10, w, h, 21).forEach((item) =>
-    drawStar(ctx, item.x, item.y, 10 * item.s, accent),
-  );
+  brandMark(ctx, w, "#5A3A1A", "WOW!");
+  cornerMotifs(w, h, (x, y) => drawStar(ctx, x, y, 9, accent));
 }
 
 function drawRoses(
@@ -556,13 +506,14 @@ function drawRoses(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, `${accent}CC`, "#FFFFFF99", 34);
-  scatter(10, w, h, 55).forEach((item) => {
+  doubleFrame(ctx, w, h, `${accent}BB`, "#FFFFFFAA", 32);
+  brandMark(ctx, w, accent, "rose");
+  cornerMotifs(w, h, (x, y) => {
     ctx.save();
-    ctx.translate(item.x, item.y);
+    ctx.translate(x, y);
     for (let i = 3; i >= 1; i -= 1) {
       ctx.beginPath();
-      ctx.arc(0, 0, 8 * item.s * i, 0, Math.PI * 2);
+      ctx.arc(0, 0, 5 * i, 0, Math.PI * 2);
       ctx.fillStyle = i === 1 ? "#FFF0F4" : accent;
       ctx.fill();
     }
@@ -578,16 +529,15 @@ function drawLetter(
 ): void {
   ctx.strokeStyle = accent;
   ctx.lineWidth = 4;
+  ctx.strokeRect(14, 14, w - 28, h - 28);
+  ctx.lineWidth = 1.25;
   ctx.strokeRect(22, 22, w - 44, h - 44);
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(32, 32, w - 64, h - 64);
   ctx.fillStyle = accent;
-  ctx.font = `${Math.round(Math.min(42, w * 0.07))}px "Great Vibes", cursive`;
+  ctx.font = `${Math.round(Math.min(34, w * 0.055))}px "Great Vibes", cursive`;
   ctx.textAlign = "center";
-  ctx.fillText("for you", w / 2, 62);
-  scatter(8, w, h, 3).forEach((item) =>
-    drawHeart(ctx, item.x, item.y, 16 * item.s, "#E8B4C8"),
-  );
+  ctx.textBaseline = "middle";
+  ctx.fillText("for you", w / 2, 42);
+  cornerMotifs(w, h, (x, y) => drawHeart(ctx, x, y, 12, "#E8B4C8"));
 }
 
 function drawHearts(
@@ -596,16 +546,13 @@ function drawHearts(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFFAA", 36);
-  scatter(14, w, h, 88).forEach((item, i) =>
-    drawHeart(
-      ctx,
-      item.x,
-      item.y,
-      12 + item.s * 10,
-      i % 3 === 0 ? accent : "#FF8AA3",
-    ),
-  );
+  doubleFrame(ctx, w, h, accent, "#FFFFFFBB", 34);
+  brandMark(ctx, w, accent, "♡ love");
+  cornerMotifs(w, h, (x, y) => drawHeart(ctx, x, y, 14, accent));
+  scatter(8, w, h, 88).forEach((item, i) => {
+    if (item.y > 48 && item.y < h - 48 && item.x > 40 && item.x < w - 40) return;
+    drawHeart(ctx, item.x, item.y, 8 + item.s * 5, i % 2 ? accent : "#FF8AA3");
+  });
 }
 
 function drawLace(
@@ -615,30 +562,32 @@ function drawLace(
   accent: string,
 ): void {
   ctx.strokeStyle = accent;
-  ctx.lineWidth = 2.2;
-  const step = 20;
-  for (let x = 24; x < w - 24; x += step) {
+  ctx.lineWidth = 1.8;
+  const step = 18;
+  for (let x = 22; x < w - 22; x += step) {
     ctx.beginPath();
-    ctx.arc(x, 26, 8, 0, Math.PI);
+    ctx.arc(x, 18, 6, 0, Math.PI);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(x, h - 26, 8, Math.PI, Math.PI * 2);
-    ctx.stroke();
-  }
-  for (let y = 24; y < h - 24; y += step) {
-    ctx.beginPath();
-    ctx.arc(26, y, 8, Math.PI * 1.5, Math.PI * 0.5);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(w - 26, y, 8, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.arc(x, h - 18, 6, Math.PI, Math.PI * 2);
     ctx.stroke();
   }
-  scatter(8, w, h, 17).forEach((item) => {
+  for (let y = 22; y < h - 22; y += step) {
+    ctx.beginPath();
+    ctx.arc(18, y, 6, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(w - 18, y, 6, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.stroke();
+  }
+  brandMark(ctx, w, accent, "pearl");
+  cornerMotifs(w, h, (x, y) => {
     ctx.beginPath();
     ctx.fillStyle = "#FFFFFF";
-    ctx.arc(item.x, item.y, 5 * item.s, 0, Math.PI * 2);
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = accent;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
   });
 }
@@ -649,19 +598,20 @@ function drawSunset(
   h: number,
   accent: string,
 ): void {
-  const g = ctx.createLinearGradient(0, 0, 0, 120);
-  g.addColorStop(0, "rgba(255, 140, 90, 0.45)");
+  const g = ctx.createLinearGradient(0, 0, 0, 64);
+  g.addColorStop(0, "rgba(255, 140, 90, 0.4)");
   g.addColorStop(1, "rgba(255, 140, 90, 0)");
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, 140);
+  ctx.fillRect(0, 0, w, 64);
   ctx.fillStyle = accent;
   ctx.beginPath();
-  ctx.arc(w - 70, 64, 30, 0, Math.PI * 2);
+  ctx.arc(w - 48, 32, 14, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#FFFFFFAA";
-  ctx.lineWidth = 10;
-  roundedRect(ctx, 16, 16, w - 32, h - 32, 28);
+  ctx.strokeStyle = "rgba(255,255,255,0.7)";
+  ctx.lineWidth = 8;
+  roundedRect(ctx, 12, 12, w - 24, h - 24, 22);
   ctx.stroke();
+  brandMark(ctx, w, "#5A2040", "sunset");
 }
 
 function drawNeon(
@@ -671,34 +621,36 @@ function drawNeon(
   accent: string,
 ): void {
   ctx.shadowColor = accent;
-  ctx.shadowBlur = 22;
+  ctx.shadowBlur = 16;
   ctx.strokeStyle = accent;
-  ctx.lineWidth = 5;
-  roundedRect(ctx, 18, 18, w - 36, h - 36, 20);
+  ctx.lineWidth = 4;
+  roundedRect(ctx, 12, 12, w - 24, h - 24, 18);
   ctx.stroke();
   ctx.shadowColor = "#3DF0FF";
   ctx.strokeStyle = "#3DF0FF";
-  ctx.lineWidth = 2;
-  roundedRect(ctx, 32, 32, w - 64, h - 64, 14);
+  ctx.lineWidth = 1.75;
+  roundedRect(ctx, 22, 22, w - 44, h - 44, 12);
   ctx.stroke();
   ctx.shadowBlur = 0;
+  brandMark(ctx, w, accent, "NEON");
 }
 
 function drawNoir(ctx: CanvasRenderingContext2D, w: number, h: number): void {
-  const hole = 18;
-  const gap = 12;
-  ctx.fillStyle = "#000000";
-  for (let y = 16; y < h - 16; y += hole + gap) {
-    ctx.fillRect(8, y, 22, hole);
-    ctx.fillRect(w - 30, y, 22, hole);
+  const hole = 12;
+  const gap = 9;
+  ctx.fillStyle = "#0A0A0A";
+  for (let y = 14; y < h - 14; y += hole + gap) {
+    ctx.fillRect(7, y, 14, hole);
+    ctx.fillRect(w - 21, y, 14, hole);
   }
   ctx.strokeStyle = "#FFFFFF";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(40, 16, w - 80, h - 32);
-  ctx.font = "italic 26px Poppins, sans-serif";
+  ctx.lineWidth = 1.75;
+  ctx.strokeRect(26, 14, w - 52, h - 28);
+  ctx.font = "italic 600 18px Poppins, sans-serif";
   ctx.fillStyle = "#FFFFFF";
   ctx.textAlign = "center";
-  ctx.fillText("NOIR", w / 2, 48);
+  ctx.textBaseline = "middle";
+  ctx.fillText("NOIR", w / 2, 36);
 }
 
 function drawChrome(
@@ -707,18 +659,19 @@ function drawChrome(
   h: number,
   accent: string,
 ): void {
-  const g = ctx.createLinearGradient(0, 0, w, 40);
+  const g = ctx.createLinearGradient(0, 0, w, 36);
   g.addColorStop(0, "#FFFFFF");
-  g.addColorStop(0.5, accent);
+  g.addColorStop(0.45, accent);
   g.addColorStop(1, "#C0C8D8");
   ctx.strokeStyle = g;
-  ctx.lineWidth = 16;
-  roundedRect(ctx, 14, 14, w - 28, h - 28, 22);
+  ctx.lineWidth = 14;
+  roundedRect(ctx, 10, 10, w - 20, h - 20, 18);
   ctx.stroke();
-  ctx.fillStyle = "#1A2030";
-  ctx.font = "700 22px Poppins, sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText("Y2K", 36, 50);
+  ctx.strokeStyle = "rgba(255,255,255,0.7)";
+  ctx.lineWidth = 2;
+  roundedRect(ctx, 20, 20, w - 40, h - 40, 12);
+  ctx.stroke();
+  brandMark(ctx, w, "#1A2030", "Y2K");
 }
 
 function drawStreet(
@@ -729,20 +682,12 @@ function drawStreet(
 ): void {
   ctx.strokeStyle = "#111111";
   ctx.lineWidth = 12;
-  ctx.strokeRect(16, 16, w - 32, h - 32);
-  ctx.fillStyle = accent;
-  ctx.font = "800 26px Poppins, sans-serif";
-  ctx.textAlign = "right";
-  ctx.fillText("SNAP!", w - 36, 52);
-  scatter(8, w, h, 64).forEach((item, i) =>
-    drawStar(
-      ctx,
-      item.x,
-      item.y,
-      12 * item.s,
-      i % 2 === 0 ? "#2BD9FF" : "#C8FF3B",
-    ),
-  );
+  ctx.strokeRect(12, 12, w - 24, h - 24);
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(20, 20, w - 40, h - 40);
+  brandMark(ctx, w, accent, "SNAP!");
+  cornerMotifs(w, h, (x, y) => drawStar(ctx, x, y, 8, "#2BD9FF"));
 }
 
 function drawVintage(
@@ -752,14 +697,11 @@ function drawVintage(
   accent: string,
 ): void {
   ctx.strokeStyle = accent;
-  ctx.lineWidth = 18;
-  ctx.strokeRect(10, 10, w - 20, h - 20);
-  ctx.lineWidth = 2;
-  ctx.strokeRect(28, 28, w - 56, h - 56);
-  ctx.fillStyle = accent;
-  ctx.font = "italic 22px Poppins, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("est. analog", w / 2, 48);
+  ctx.lineWidth = 16;
+  ctx.strokeRect(8, 8, w - 16, h - 16);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(22, 22, w - 44, h - 44);
+  brandMark(ctx, w, accent, "analog");
 }
 
 function drawCatsCafe(
@@ -768,15 +710,12 @@ function drawCatsCafe(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFFCC", 32);
-  scatter(7, w, h, 11).forEach((item) =>
-    drawPawPrint(ctx, item.x, item.y, 12 * item.s, `${accent}99`, item.r),
-  );
-  scatter(4, w, h, 77).forEach((item) =>
-    drawFish(ctx, item.x, item.y, 10 * item.s, "#7EC8E3"),
-  );
-  drawCatFace(ctx, 48, 48, 32, "#E8A05A", "#FFC6B8", "#E07A6A");
-  drawCatFace(ctx, w - 48, h - 56, 30, "#F8F2EA", "#FFB6C8", "#E07A6A");
+  doubleFrame(ctx, w, h, accent, "#FFFFFFCC", 30);
+  brandMark(ctx, w, "#8A4A28", "meow café");
+  drawCatFace(ctx, 40, 40, 22, "#E8A05A", "#FFC6B8", "#E07A6A");
+  drawCatFace(ctx, w - 40, h - 40, 20, "#F8F2EA", "#FFB6C8", "#E07A6A");
+  drawPawPrint(ctx, w - 40, 40, 11, `${accent}AA`, 0.3);
+  drawPawPrint(ctx, 40, h - 40, 11, `${accent}AA`, -0.4);
 }
 
 function drawCatsCalico(
@@ -785,16 +724,13 @@ function drawCatsCalico(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFF", 34);
-  scatter(6, w, h, 19).forEach((item) =>
-    drawBow(ctx, item.x, item.y, 10 * item.s, accent),
-  );
-  scatter(6, w, h, 41).forEach((item) =>
-    drawPawPrint(ctx, item.x, item.y, 11 * item.s, "#F9A8D4", item.r),
-  );
-  drawCatFace(ctx, 46, 50, 32, "#F4D6C8", "#FFB6C8", "#F472B6");
-  drawCatFace(ctx, w - 50, 52, 28, "#3A2A28", "#FFB6C8", "#F472B6");
-  drawCatFace(ctx, w / 2, h - 48, 30, "#E8A05A", "#FFC6B8", "#E07A6A");
+  doubleFrame(ctx, w, h, accent, "#FFFFFF", 32);
+  brandMark(ctx, w, accent, "calico");
+  drawCatFace(ctx, 42, 40, 22, "#F4D6C8", "#FFB6C8", "#F472B6");
+  drawCatFace(ctx, w - 42, 40, 20, "#3A2A28", "#FFB6C8", "#F472B6");
+  drawBow(ctx, w / 2, 50, 15, accent);
+  drawPawPrint(ctx, 42, h - 40, 10, "#F9A8D4", -0.2);
+  drawPawPrint(ctx, w - 42, h - 40, 10, "#F9A8D4", 0.2);
 }
 
 function drawCatsMoon(
@@ -804,22 +740,28 @@ function drawCatsMoon(
   accent: string,
 ): void {
   ctx.shadowColor = accent;
-  ctx.shadowBlur = 16;
+  ctx.shadowBlur = 14;
   ctx.strokeStyle = accent;
-  ctx.lineWidth = 5;
-  roundedRect(ctx, 16, 16, w - 32, h - 32, 24);
+  ctx.lineWidth = 4;
+  roundedRect(ctx, 12, 12, w - 24, h - 24, 22);
   ctx.stroke();
   ctx.shadowBlur = 0;
+  ctx.strokeStyle = "rgba(233,213,255,0.45)";
+  ctx.lineWidth = 1.5;
+  roundedRect(ctx, 22, 22, w - 44, h - 44, 14);
+  ctx.stroke();
   ctx.fillStyle = "#FDE68A";
   ctx.beginPath();
-  ctx.arc(w - 64, 56, 22, 0, Math.PI * 2);
-  ctx.arc(w - 52, 50, 18, 0, Math.PI * 2, true);
+  ctx.arc(w - 44, 36, 14, 0, Math.PI * 2);
+  ctx.arc(w - 36, 32, 11, 0, Math.PI * 2, true);
   ctx.fill("evenodd");
-  scatter(12, w, h, 33).forEach((item) =>
-    drawStar(ctx, item.x, item.y, 5 + item.s * 5, "#E9D5FF"),
-  );
-  drawCatFace(ctx, 50, 54, 30, "#E8E0F8", "#7C3AED", "#C4B5FD");
-  drawCatFace(ctx, w - 52, h - 58, 28, "#DDD6FE", "#A78BFA", "#F472B6");
+  brandMark(ctx, w, accent, "moon neko");
+  drawCatFace(ctx, 44, 40, 22, "#E8E0F8", "#7C3AED", "#C4B5FD");
+  drawCatFace(ctx, w - 48, h - 40, 20, "#DDD6FE", "#A78BFA", "#F472B6");
+  scatter(8, w, h, 33).forEach((item) => {
+    if (item.y > 55 && item.y < h - 55) return;
+    drawStar(ctx, item.x, item.y, 3 + item.s * 3, "#E9D5FF");
+  });
 }
 
 function drawCatsPaws(
@@ -828,18 +770,24 @@ function drawCatsPaws(
   h: number,
   accent: string,
 ): void {
-  doubleFrame(ctx, w, h, accent, "#FFFFFF", 30);
-  const colors = [accent, "#F472B6", "#FBBF24", "#67E8F9", "#C4B5FD"];
-  scatter(16, w, h, 5).forEach((item, i) =>
+  doubleFrame(ctx, w, h, accent, "#FFFFFF", 28);
+  brandMark(ctx, w, accent, "paw party");
+  const colors = [accent, "#F472B6", "#FBBF24", "#67E8F9"];
+  cornerMotifs(w, h, (x, y) => {
+    drawPawPrint(ctx, x, y, 12, accent, 0.15);
+  });
+  scatter(8, w, h, 5).forEach((item, i) => {
+    if (item.y > 50 && item.y < h - 50 && item.x > 36 && item.x < w - 36) return;
     drawPawPrint(
       ctx,
       item.x,
       item.y,
-      11 + item.s * 6,
+      9 + item.s * 3,
       colors[i % colors.length] ?? accent,
       item.r,
-    ),
-  );
-  drawCatFace(ctx, 46, 48, 30, "#C4B5FD", "#DDD6FE", "#F472B6");
-  drawCatFace(ctx, w - 48, h - 54, 30, "#FDE68A", "#FBCFE8", "#F472B6");
+    );
+  });
+  drawCatFace(ctx, 42, 40, 20, "#C4B5FD", "#DDD6FE", "#F472B6");
+  drawCatFace(ctx, w - 42, h - 40, 20, "#FDE68A", "#FBCFE8", "#F472B6");
 }
+

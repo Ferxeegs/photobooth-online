@@ -1,5 +1,5 @@
 import { frames, themeLabels } from "@/data/frames";
-import { drawDecorations, drawSlotOrnaments, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
 import type { Slot, ThemeId } from "@/types";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
@@ -29,16 +29,23 @@ export function FrameSwatch({
     ctx.fillStyle = frame.bg;
     ctx.fillRect(0, 0, w, h);
     const slots: Slot[] = [
-      { x: 22, y: 22, w: 116, h: 72, radius: 10 },
-      { x: 22, y: 104, w: 116, h: 72, radius: 10 },
+      { x: 24, y: 28, w: 112, h: 66, radius: 8 },
+      { x: 24, y: 104, w: 112, h: 66, radius: 8 },
     ];
     slots.forEach((slot) => {
-      roundedRect(ctx, slot.x - 4, slot.y - 4, slot.w + 8, slot.h + 8, slot.radius + 4);
+      roundedRect(ctx, slot.x - 5, slot.y - 5, slot.w + 10, slot.h + 10, slot.radius + 4);
       ctx.fillStyle = frame.mat;
       ctx.fill();
       roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
-      ctx.fillStyle = `${frame.accent}55`;
+      const g = ctx.createLinearGradient(slot.x, slot.y, slot.x + slot.w, slot.y + slot.h);
+      g.addColorStop(0, `${frame.accent}55`);
+      g.addColorStop(1, `${frame.accent}22`);
+      ctx.fillStyle = g;
       ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.5)";
+      ctx.lineWidth = 1;
+      roundedRect(ctx, slot.x + 0.5, slot.y + 0.5, slot.w - 1, slot.h - 1, slot.radius);
+      ctx.stroke();
     });
     ctx.save();
     ctx.beginPath();
@@ -50,24 +57,23 @@ export function FrameSwatch({
     ctx.clip("evenodd");
     drawDecorations(ctx, frame.decoration, w, h, frame.accent);
     ctx.restore();
-    drawSlotOrnaments(ctx, frame.decoration, slots, frame.accent);
   }, [frame]);
 
   if (!frame) return null;
 
   return (
     <motion.div
-      whileHover={{ scale: 1.04, y: -2 }}
-      whileTap={{ scale: 0.96 }}
+      whileHover={{ scale: 1.03, y: -2 }}
+      whileTap={{ scale: 0.97 }}
       className={`relative overflow-hidden rounded-3xl transition-all select-none ${
         selected
-          ? "ring-4 ring-purple-400 shadow-lg border-2 border-white"
+          ? "border-2 border-white shadow-lg ring-4 ring-purple-400"
           : "border border-purple-100 hover:shadow-md"
       }`}
     >
       <canvas
         ref={canvasRef}
-        className="block h-32 w-full object-cover"
+        className="block aspect-[4/5] w-full object-cover"
         aria-hidden
       />
       {selected ? (
@@ -75,7 +81,7 @@ export function FrameSwatch({
           ✓
         </span>
       ) : null}
-      <div className="bg-white/90 p-2.5 backdrop-blur-xs">
+      <div className="bg-white/95 p-2.5">
         <p className="truncate font-display text-sm font-bold text-purple-950">{frame.name}</p>
         <p className="text-[11px] font-semibold text-purple-800/60">
           {themeLabels[frame.theme as ThemeId]}
