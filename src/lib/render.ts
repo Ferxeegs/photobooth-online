@@ -1,6 +1,7 @@
 import { applyPhotoFilter } from "@/lib/colorFilter";
-import type { FilterId, FrameStyle, Layout, Photo, PlacedSticker } from "@/types";
 import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { loadMofusandImages } from "@/lib/mofusand";
+import type { FilterId, FrameStyle, Layout, Photo, PlacedSticker } from "@/types";
 
 /** Base emoji size in layout canvas units at scale = 1. */
 export const STICKER_BASE_SIZE = 64;
@@ -193,24 +194,28 @@ export async function renderCollage(
     ctx.restore();
   }
 
+  const decoAssets = await loadMofusandImages(frame.decoration);
+  const mofusandOnTop = frame.decoration.startsWith("mofusand-");
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, layout.canvas.width, layout.canvas.height);
-  layout.slots.forEach((slot) => {
-    pathRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
-    ctx.closePath();
-  });
-  ctx.clip("evenodd");
+  // Mofusand stickers sit on top of photos; other themes stay in the margin only
+  if (!mofusandOnTop) {
+    ctx.beginPath();
+    ctx.rect(0, 0, layout.canvas.width, layout.canvas.height);
+    layout.slots.forEach((slot) => {
+      pathRoundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
+      ctx.closePath();
+    });
+    ctx.clip("evenodd");
+  }
   drawDecorations(
     ctx,
     frame.decoration,
     layout.canvas.width,
     layout.canvas.height,
     frame.accent,
+    decoAssets,
   );
   ctx.restore();
-
-  // Ornamen hanya di margin (sudah di-clip); slot ornaments di atas foto dihapus agar tidak menutupi wajah
 
   const area = layout.captionArea;
   if (area.h > 0) {

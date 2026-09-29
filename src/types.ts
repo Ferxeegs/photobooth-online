@@ -1,4 +1,4 @@
-export type ThemeId = "cute" | "romantic" | "cool" | "cat";
+export type ThemeId = "cute" | "romantic" | "cool" | "cat" | "mofusand";
 export type CaptureMode = "auto" | "manual";
 export type FacingMode = "user" | "environment";
 export type PhotoSource = "camera" | "upload";
@@ -104,4 +104,9 @@ export type DecorationKind =
   | "cats-moon"
   | "cats-paws"
   | "plain"
-  | "none";
+  | "none"
+  | "mofusand-shark"
+  | "mofusand-berry"
+  | "mofusand-cafe"
+  | "mofusand-friends"
+  | "mofusand-mix";

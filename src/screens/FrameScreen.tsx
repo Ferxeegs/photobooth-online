@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
-const themes: ThemeId[] = ["cute", "cat", "romantic", "cool"];
+const themes: ThemeId[] = ["cute", "cat", "mofusand", "romantic", "cool"];
 
 export function FrameScreen() {
   const { frameId, setFrame, background, setBackground, setStep } = useSession();
@@ -102,7 +102,16 @@ export function FrameScreen() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
           {themes.map((id) => (
             <Chip key={id} active={theme === id} onClick={() => setTheme(id)}>
-              {id === "cute" ? "🧸" : id === "cat" ? "🐱" : id === "romantic" ? "💕" : "😎"} {themeLabels[id]}
+              {id === "cute"
+                ? "🧸"
+                : id === "cat"
+                  ? "🐱"
+                  : id === "mofusand"
+                    ? "🦈"
+                    : id === "romantic"
+                      ? "💕"
+                      : "😎"}{" "}
+              {themeLabels[id]}
             </Chip>
           ))}
         </div>

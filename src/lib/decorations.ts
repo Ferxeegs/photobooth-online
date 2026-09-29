@@ -1,3 +1,5 @@
+import { drawMofusandDecoration, type MofusandImages } from "@/lib/mofusand";
+
 export function roundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -439,6 +441,7 @@ export function drawDecorations(
   canvasW: number,
   canvasH: number,
   accent: string,
+  assets?: MofusandImages,
 ): void {
   ctx.save();
   switch (kind) {
@@ -513,6 +516,13 @@ export function drawDecorations(
       break;
     case "plain":
       drawPlain(ctx, canvasW, canvasH, accent);
+      break;
+    case "mofusand-shark":
+    case "mofusand-berry":
+    case "mofusand-cafe":
+    case "mofusand-friends":
+    case "mofusand-mix":
+      drawMofusandDecoration(ctx, kind, canvasW, canvasH, accent, assets);
       break;
     case "none":
       break;

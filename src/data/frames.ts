@@ -325,6 +325,62 @@ export const frames: FrameStyle[] = [
     mat: "#1E293B",
     decoration: "hologram",
   },
+  // —— Mofusand ——
+  {
+    id: "mofu-shark",
+    name: "Same-nyan",
+    theme: "mofusand",
+    bg: "#E8F4FA",
+    palette: ["#E8F4FA", "#D6EAF5", "#F8FBFD", "#C8E4F5", "#FFFFFF"],
+    captionColor: "#4A6F80",
+    accent: "#7BA3B8",
+    mat: "#FFFFFF",
+    decoration: "mofusand-shark",
+  },
+  {
+    id: "mofu-berry",
+    name: "Ichigo-nyan",
+    theme: "mofusand",
+    bg: "#FFF1F5",
+    palette: ["#FFF1F5", "#FFE4EC", "#FFFFFF", "#FCE7F3", "#FFF7ED"],
+    captionColor: "#BE123C",
+    accent: "#FB7185",
+    mat: "#FFFFFF",
+    decoration: "mofusand-berry",
+  },
+  {
+    id: "mofu-cafe",
+    name: "Ebi · Purin",
+    theme: "mofusand",
+    bg: "#FFF7ED",
+    palette: ["#FFF7ED", "#FFEDD5", "#FFFFFF", "#FEF3C7", "#FFFBEB"],
+    captionColor: "#9A3412",
+    accent: "#E8B86D",
+    mat: "#FFFBF5",
+    decoration: "mofusand-cafe",
+  },
+  {
+    id: "mofu-friends",
+    name: "Mofu Friends",
+    theme: "mofusand",
+    bg: "#F0F7FC",
+    palette: ["#F0F7FC", "#E0F2FE", "#FFFFFF", "#E8F4FA", "#F8FAFC"],
+    captionColor: "#475569",
+    accent: "#7BA3B8",
+    mat: "#FFFFFF",
+    decoration: "mofusand-friends",
+  },
+  {
+    id: "mofu-mix",
+    name: "Mofu Mix",
+    theme: "mofusand",
+    bg: "#F5F3FF",
+    palette: ["#F5F3FF", "#EDE9FE", "#FFFFFF", "#FCE7F3", "#E0F2FE"],
+    captionColor: "#6D28D9",
+    accent: "#A78BFA",
+    mat: "#FFFFFF",
+    decoration: "mofusand-mix",
+  },
 ];
 
 export const bgPalettes: Record<string, string[]> = {
@@ -332,6 +388,7 @@ export const bgPalettes: Record<string, string[]> = {
   cat: ["#FFF3E8", "#FFE8F0", "#F5F0FF", "#2A1848", "#FFFFFF", "#FFFBEA"],
   romantic: ["#F8E8EE", "#F6ECD9", "#FFE4EC", "#F7F1EA", "#FFF1F5", "#FFFFFF"],
   cool: ["#0B0714", "#111111", "#D9DEE8", "#F4F0E6", "#E8DCC8", "#0F172A"],
+  mofusand: ["#E8F4FA", "#F0F7FC", "#FFF1F5", "#FFF7ED", "#FFFFFF", "#C8E4F5"],
 };
 
 export function getFrame(id: string): FrameStyle {
@@ -345,4 +402,5 @@ export const themeLabels: Record<FrameStyle["theme"], string> = {
   cat: "Kucing",
   romantic: "Romantis",
   cool: "Keren",
+  mofusand: "Mofusand",
 };
