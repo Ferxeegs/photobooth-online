@@ -5,7 +5,7 @@ import { layouts } from "@/data/layouts";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
-import { Camera, ShieldCheck } from "lucide-react";
+import { Camera, Heart, ShieldCheck } from "lucide-react";
 
 const strips = [
   {
@@ -358,8 +358,13 @@ export function LandingScreen() {
           </Button>
         </section>
 
-        <footer className="mt-8 pb-2 text-center text-xs text-ink-soft">
-          🛡️ Fotomu tidak diunggah. Diproses 100% di browser.
+        <footer className="mt-8 space-y-1.5 pb-2 text-center text-xs text-ink-soft">
+          <p>🛡️ Fotomu tidak diunggah. Diproses 100% di browser.</p>
+          <p className="flex items-center justify-center gap-1">
+            © 2026 Ferxcode | Made by
+            <Heart size={12} className="fill-rose-500 text-rose-500" aria-label="love" />
+            for Putri Firyal Rahmania
+          </p>
         </footer>
       </div>
     </div>

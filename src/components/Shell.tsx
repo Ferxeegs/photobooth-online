@@ -1,6 +1,6 @@
 import { FloatingParticles } from "@/components/FloatingParticles";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -101,15 +101,26 @@ export function Shell({
         {children}
       </main>
 
-      {footer ? (
-        <footer
-          className={`sticky bottom-0 z-30 border-t border-white/40 px-4 py-3.5 backdrop-blur-xl thumb-safe ${
-            dark ? "bg-slate-950/60 border-slate-800/50" : "bg-white/70 shadow-lg"
-          }`}
+      <footer
+        className={`sticky bottom-0 z-30 border-t border-white/40 px-4 py-3.5 backdrop-blur-xl thumb-safe ${
+          dark ? "bg-slate-950/60 border-slate-800/50" : "bg-white/70 shadow-lg"
+        }`}
+      >
+        {footer ? <div className={`mx-auto w-full ${width}`}>{footer}</div> : null}
+        <p
+          className={`flex items-center justify-center gap-1 text-[11px] font-medium ${
+            footer ? "mt-2" : ""
+          } ${dark ? "text-purple-300/70" : "text-purple-800/50"}`}
         >
-          <div className={`mx-auto w-full ${width}`}>{footer}</div>
-        </footer>
-      ) : null}
+          © 2026 Ferxcode | Made by
+          <Heart
+            size={12}
+            className="fill-rose-500 text-rose-500"
+            aria-label="love"
+          />
+          for Putri Firyal Rahmania
+        </p>
+      </footer>
     </div>
   );
 }
