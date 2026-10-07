@@ -64,9 +64,9 @@ function tonePixels(data: Uint8ClampedArray, filter: FilterId): void {
     g = (g - 128) * spec.contrast + 128;
     b = (b - 128) * spec.contrast + 128;
 
-    r *= spec.brightness;
-    g *= spec.brightness;
-    b *= spec.brightness;
+    r *= spec.brightness * spec.tintR;
+    g *= spec.brightness * spec.tintG;
+    b *= spec.brightness * spec.tintB;
 
     data[i] = clamp(r);
     data[i + 1] = clamp(g);
@@ -76,13 +76,28 @@ function tonePixels(data: Uint8ClampedArray, filter: FilterId): void {
 
 const specs: Record<
   Exclude<FilterId, "normal">,
-  { gray: boolean; sepia: number; sat: number; contrast: number; brightness: number }
+  {
+    gray: boolean;
+    sepia: number;
+    sat: number;
+    contrast: number;
+    brightness: number;
+    tintR: number;
+    tintG: number;
+    tintB: number;
+  }
 > = {
-  bw: { gray: true, sepia: 0, sat: 1, contrast: 1.08, brightness: 1 },
-  sepia: { gray: false, sepia: 0.85, sat: 1, contrast: 1.05, brightness: 1 },
-  pastel: { gray: false, sepia: 0, sat: 0.72, contrast: 0.92, brightness: 1.08 },
-  vintage: { gray: false, sepia: 0.35, sat: 0.78, contrast: 1.12, brightness: 1.02 },
-  glow: { gray: false, sepia: 0, sat: 1.18, contrast: 0.94, brightness: 1.12 },
+  bw: { gray: true, sepia: 0, sat: 1, contrast: 1.08, brightness: 1, tintR: 1, tintG: 1, tintB: 1 },
+  sepia: { gray: false, sepia: 0.85, sat: 1, contrast: 1.05, brightness: 1, tintR: 1, tintG: 1, tintB: 1 },
+  pastel: { gray: false, sepia: 0, sat: 0.72, contrast: 0.92, brightness: 1.08, tintR: 1.02, tintG: 1, tintB: 1.03 },
+  vintage: { gray: false, sepia: 0.35, sat: 0.78, contrast: 1.12, brightness: 1.02, tintR: 1.04, tintG: 1, tintB: 0.94 },
+  glow: { gray: false, sepia: 0, sat: 1.18, contrast: 0.94, brightness: 1.12, tintR: 1.02, tintG: 1, tintB: 1.02 },
+  blush: { gray: false, sepia: 0.08, sat: 1.08, contrast: 0.96, brightness: 1.06, tintR: 1.16, tintG: 0.94, tintB: 1.04 },
+  peach: { gray: false, sepia: 0.18, sat: 1.12, contrast: 1.02, brightness: 1.05, tintR: 1.14, tintG: 1.02, tintB: 0.86 },
+  mint: { gray: false, sepia: 0, sat: 0.92, contrast: 0.96, brightness: 1.06, tintR: 0.9, tintG: 1.1, tintB: 1.02 },
+  ice: { gray: false, sepia: 0, sat: 0.82, contrast: 1.06, brightness: 1.08, tintR: 0.88, tintG: 0.98, tintB: 1.16 },
+  lilac: { gray: false, sepia: 0.06, sat: 0.98, contrast: 0.98, brightness: 1.05, tintR: 1.06, tintG: 0.92, tintB: 1.14 },
+  vivid: { gray: false, sepia: 0, sat: 1.48, contrast: 1.14, brightness: 1.02, tintR: 1.02, tintG: 1, tintB: 1.02 },
 };
 
 function clamp(value: number): number {

@@ -1,3 +1,4 @@
+import { drawKittyDecoration, type KittyImages } from "@/lib/kitty";
 import { drawMofusandDecoration, type MofusandImages } from "@/lib/mofusand";
 
 export function roundedRect(
@@ -171,21 +172,12 @@ function edgeMotifs(
 }
 
 function brandMark(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  color: string,
-  label = "snapie",
-  y = 40,
-): void {
-  ctx.save();
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.85;
-  ctx.font = `700 ${Math.max(16, Math.round(w * 0.038))}px Poppins, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(label, w / 2, y);
-  ctx.restore();
-}
+  _ctx: CanvasRenderingContext2D,
+  _w: number,
+  _color: string,
+  _label = "snapie",
+  _y = 40,
+): void {}
 
 function solidBorder(
   ctx: CanvasRenderingContext2D,
@@ -441,7 +433,7 @@ export function drawDecorations(
   canvasW: number,
   canvasH: number,
   accent: string,
-  assets?: MofusandImages,
+  assets?: MofusandImages | KittyImages,
 ): void {
   ctx.save();
   switch (kind) {
@@ -523,6 +515,15 @@ export function drawDecorations(
     case "mofusand-friends":
     case "mofusand-mix":
       drawMofusandDecoration(ctx, kind, canvasW, canvasH, accent, assets);
+      break;
+    case "kitty-hello":
+    case "kitty-bow":
+    case "kitty-berry":
+    case "kitty-sweet":
+    case "kitty-balloon":
+    case "kitty-mix":
+    case "kitty-cutie":
+      drawKittyDecoration(ctx, kind, canvasW, canvasH, accent, assets);
       break;
     case "none":
       break;
@@ -779,11 +780,6 @@ function drawLetter(
   ctx.beginPath();
   ctx.arc(w / 2, 52, 22, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#FFE4EC";
-  ctx.font = "700 11px Poppins, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("♡", w / 2, 48);
   brandMark(ctx, w, accent, "for you ✉", 88);
 }
 
@@ -958,14 +954,6 @@ function drawNoir(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.setLineDash([3, 4]);
   ctx.strokeRect(32, 22, w - 64, h - 44);
   ctx.setLineDash([]);
-  ctx.font = "italic 700 17px Poppins, sans-serif";
-  ctx.fillStyle = "#FFFFFF";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("FILM NOIR", w / 2, 38);
-  ctx.font = "500 10px Poppins, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.fillText("take · one", w / 2, 54);
 }
 
 function drawChrome(
@@ -1048,10 +1036,6 @@ function drawVintage(
     ctx.stroke();
   });
   brandMark(ctx, w, accent, "◎ analog");
-  ctx.font = "500 11px Poppins, sans-serif";
-  ctx.fillStyle = `${accent}AA`;
-  ctx.textAlign = "center";
-  ctx.fillText("ISO 400 · 35mm", w / 2, h - 28);
 }
 
 function drawCatsCafe(

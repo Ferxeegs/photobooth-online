@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
-const themes: ThemeId[] = ["cute", "cat", "mofusand", "romantic", "cool"];
+const themes: ThemeId[] = ["cute", "cat", "kitty", "mofusand", "romantic", "cool"];
 
 export function FrameScreen() {
   const { frameId, setFrame, background, setBackground, setStep } = useSession();
@@ -106,11 +106,13 @@ export function FrameScreen() {
                 ? "🧸"
                 : id === "cat"
                   ? "🐱"
-                  : id === "mofusand"
-                    ? "🦈"
-                    : id === "romantic"
-                      ? "💕"
-                      : "😎"}{" "}
+                  : id === "kitty"
+                    ? "🎀"
+                    : id === "mofusand"
+                      ? "🦈"
+                      : id === "romantic"
+                        ? "💕"
+                        : "😎"}{" "}
               {themeLabels[id]}
             </Chip>
           ))}

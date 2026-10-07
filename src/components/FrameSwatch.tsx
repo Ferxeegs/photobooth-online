@@ -1,5 +1,6 @@
 import { frames, themeLabels } from "@/data/frames";
 import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { loadKittyImages } from "@/lib/kitty";
 import { loadMofusandImages } from "@/lib/mofusand";
 import type { Slot, ThemeId } from "@/types";
 import { motion } from "framer-motion";
@@ -29,7 +30,10 @@ export function FrameSwatch({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    void loadMofusandImages(frame.decoration).then((assets) => {
+    const loadAssets = frame.decoration.startsWith("kitty-")
+      ? loadKittyImages
+      : loadMofusandImages;
+    void loadAssets(frame.decoration).then((assets) => {
       if (cancelled || !canvasRef.current) return;
       ctx.fillStyle = frame.bg;
       ctx.fillRect(0, 0, w, h);
@@ -53,7 +57,10 @@ export function FrameSwatch({
         ctx.stroke();
       });
       ctx.save();
-      if (!frame.decoration.startsWith("mofusand-")) {
+      if (
+        !frame.decoration.startsWith("mofusand-") &&
+        !frame.decoration.startsWith("kitty-")
+      ) {
         ctx.beginPath();
         ctx.rect(0, 0, w, h);
         slots.forEach((slot) => {

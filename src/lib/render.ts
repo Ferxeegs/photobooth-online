@@ -1,5 +1,6 @@
 import { applyPhotoFilter } from "@/lib/colorFilter";
 import { drawDecorations, pathRoundedRect, roundedRect } from "@/lib/decorations";
+import { getKittySprite, loadKittyImages, loadKittySprite } from "@/lib/kitty";
 import {
   getMofusandSprite,
   loadMofusandImages,
@@ -17,14 +18,16 @@ const STICKER_FONT =
 export async function preloadPlacedStickers(
   stickers: PlacedSticker[],
 ): Promise<void> {
-  const ids = [
-    ...new Set(
-      stickers
-        .map((item) => item.mofusandId)
-        .filter((id): id is number => typeof id === "number"),
-    ),
-  ];
-  await Promise.all(ids.map((id) => loadMofusandSprite(id)));
+  const mofusandIds = stickers
+    .map((item) => item.mofusandId)
+    .filter((id): id is number => typeof id === "number");
+  const kittyIds = stickers
+    .map((item) => item.kittyId)
+    .filter((id): id is number => typeof id === "number");
+  await Promise.all([
+    ...[...new Set(mofusandIds)].map((id) => loadMofusandSprite(id)),
+    ...[...new Set(kittyIds)].map((id) => loadKittySprite(id)),
+  ]);
 }
 
 /** Draw stickers in layout canvas coordinates (same path for preview + export). */
@@ -40,20 +43,25 @@ export function drawStickers(
     ctx.rotate((sticker.rotation * Math.PI) / 180);
     const size = Math.max(1, Math.round(STICKER_BASE_SIZE * sticker.scale));
 
-    if (sticker.mofusandId) {
-      const sprite = getMofusandSprite(sticker.mofusandId);
-      if (sprite) {
-        const iw = sprite.width;
-        const ih = sprite.height;
-        if (iw && ih) {
-          const scale = Math.min(size / iw, size / ih) * 1.35;
-          const dw = iw * scale;
-          const dh = ih * scale;
-          ctx.shadowColor = "rgba(40, 30, 50, 0.2)";
-          ctx.shadowBlur = Math.max(4, size * 0.08);
-          ctx.shadowOffsetY = Math.max(1, size * 0.03);
-          ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
-        }
+    const sprite = sticker.mofusandId
+      ? getMofusandSprite(sticker.mofusandId)
+      : sticker.kittyId
+        ? getKittySprite(sticker.kittyId)
+        : undefined;
+
+    if (sprite) {
+      const iw = sprite.width;
+      const ih = sprite.height;
+      if (iw && ih) {
+        const scale = Math.min(size / iw, size / ih) * 1.35;
+        const dw = iw * scale;
+        const dh = ih * scale;
+        ctx.shadowColor = sticker.kittyId
+          ? "rgba(190, 24, 93, 0.18)"
+          : "rgba(40, 30, 50, 0.2)";
+        ctx.shadowBlur = Math.max(4, size * 0.08);
+        ctx.shadowOffsetY = Math.max(1, size * 0.03);
+        ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
       }
     } else if (sticker.emoji) {
       ctx.font = `${size}px ${STICKER_FONT}`;
@@ -153,36 +161,39 @@ export async function renderCollage(
     img ? applyPhotoFilter(img, filter) : null,
   );
 
+  const cutie = frame.decoration === "kitty-cutie";
+
   layout.slots.forEach((slot, index) => {
     const img = filtered[index];
     const photo = photos[index];
+    const radius = cutie ? Math.round(Math.min(22, slot.w * 0.045)) : slot.radius;
 
-    // Polaroid / booth matte — sharp corners
-    ctx.save();
-    roundedRect(ctx, slot.x - 10, slot.y - 10, slot.w + 20, slot.h + 20, slot.radius);
-    ctx.fillStyle = frame.mat || "#ffffff";
-    ctx.fill();
-    ctx.restore();
+    if (!cutie) {
+      ctx.save();
+      roundedRect(ctx, slot.x - 10, slot.y - 10, slot.w + 20, slot.h + 20, radius);
+      ctx.fillStyle = frame.mat || "#ffffff";
+      ctx.fill();
+      ctx.restore();
 
-    // Soft matte edge
-    ctx.save();
-    ctx.strokeStyle = "rgba(42,24,72,0.08)";
-    ctx.lineWidth = 1;
-    roundedRect(
-      ctx,
-      slot.x - 10.5,
-      slot.y - 10.5,
-      slot.w + 21,
-      slot.h + 21,
-      slot.radius,
-    );
-    ctx.stroke();
-    ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = "rgba(42,24,72,0.08)";
+      ctx.lineWidth = 1;
+      roundedRect(
+        ctx,
+        slot.x - 10.5,
+        slot.y - 10.5,
+        slot.w + 21,
+        slot.h + 21,
+        radius,
+      );
+      ctx.stroke();
+      ctx.restore();
+    }
 
     ctx.save();
-    roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, slot.radius);
+    roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, radius);
     ctx.clip();
-    ctx.fillStyle = "#e8e0ea";
+    ctx.fillStyle = cutie ? "#FFF0F5" : "#e8e0ea";
     ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
     if (img && photo) {
       drawCover(
@@ -199,16 +210,23 @@ export async function renderCollage(
     }
     ctx.restore();
 
-    // Clean studio rim on photo
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.65)";
-    ctx.lineWidth = 2;
-    roundedRect(ctx, slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2, slot.radius);
-    ctx.stroke();
-    ctx.strokeStyle = `${frame.accent}33`;
-    ctx.lineWidth = 1.5;
-    roundedRect(ctx, slot.x - 1, slot.y - 1, slot.w + 2, slot.h + 2, slot.radius);
-    ctx.stroke();
+    if (cutie) {
+      ctx.strokeStyle = "#F8C4D8";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 7]);
+      roundedRect(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = "rgba(255,255,255,0.65)";
+      ctx.lineWidth = 2;
+      roundedRect(ctx, slot.x + 1, slot.y + 1, slot.w - 2, slot.h - 2, radius);
+      ctx.stroke();
+      ctx.strokeStyle = `${frame.accent}33`;
+      ctx.lineWidth = 1.5;
+      roundedRect(ctx, slot.x - 1, slot.y - 1, slot.w + 2, slot.h + 2, radius);
+      ctx.stroke();
+    }
     ctx.restore();
   });
 
@@ -230,11 +248,14 @@ export async function renderCollage(
     ctx.restore();
   }
 
-  const decoAssets = await loadMofusandImages(frame.decoration);
-  const mofusandOnTop = frame.decoration.startsWith("mofusand-");
+  const decoAssets = frame.decoration.startsWith("kitty-")
+    ? await loadKittyImages(frame.decoration)
+    : await loadMofusandImages(frame.decoration);
+  const stickersOnTop =
+    frame.decoration.startsWith("mofusand-") || frame.decoration.startsWith("kitty-");
   ctx.save();
-  // Mofusand stickers sit on top of photos; other themes stay in the margin only
-  if (!mofusandOnTop) {
+  // Character stickers sit on top of photos; other themes stay in the margin only
+  if (!stickersOnTop) {
     ctx.beginPath();
     ctx.rect(0, 0, layout.canvas.width, layout.canvas.height);
     layout.slots.forEach((slot) => {
@@ -254,7 +275,9 @@ export async function renderCollage(
   ctx.restore();
 
   const area = layout.captionArea;
-  if (area.h > 0) {
+  if (cutie) {
+    drawCutieFooter(ctx, layout, frame, caption, showDate, area);
+  } else if (area.h > 0) {
     const dateText = showDate ? formatCaptionDate(new Date()) : "";
     const lines = [caption.trim(), dateText].filter(Boolean);
     if (lines.length) {
@@ -264,15 +287,31 @@ export async function renderCollage(
       const script = /romantic|letter|heart|lace|rose|sunset|cats-/i.test(
         frame.decoration,
       );
+      const titleSize = Math.round(
+        Math.min(
+          script ? 84 : 58,
+          Math.max(script ? 48 : 40, layout.canvas.width * (script ? 0.095 : 0.078)),
+        ),
+      );
+      const dateSize = Math.round(Math.max(24, titleSize * 0.58));
+      const gap = Math.round(titleSize * 0.2);
+      const blockH = lines.length > 1 ? titleSize + gap + dateSize : titleSize;
+      const bottomKeep = Math.round(Math.max(52, layout.canvas.height * 0.055));
+      const idealTop = layout.canvas.height - bottomKeep - blockH;
+      const top = Math.min(area.y + 6, Math.max(area.y - 80, idealTop));
+      const titleY = top + titleSize / 2;
       ctx.font = script
-        ? `${Math.min(48, area.h * 0.42)}px "Great Vibes", cursive`
-        : `600 ${Math.min(28, area.h * 0.28)}px "Baloo 2", sans-serif`;
-      const centerY =
-        area.y + area.h / 2 - (lines.length > 1 ? 14 : 0);
-      ctx.fillText(lines[0], area.x + area.w / 2, centerY, area.w - 16);
+        ? `${titleSize}px "Great Vibes", cursive`
+        : `700 ${titleSize}px "Baloo 2", sans-serif`;
+      ctx.fillText(lines[0], area.x + area.w / 2, titleY, area.w - 24);
       if (lines[1]) {
-        ctx.font = `500 18px Poppins, sans-serif`;
-        ctx.fillText(lines[1], area.x + area.w / 2, centerY + 32, area.w - 16);
+        ctx.font = `600 ${dateSize}px Poppins, sans-serif`;
+        ctx.fillText(
+          lines[1],
+          area.x + area.w / 2,
+          titleY + titleSize / 2 + gap + dateSize / 2,
+          area.w - 24,
+        );
       }
     }
   }
@@ -328,4 +367,36 @@ function formatCaptionDate(date: Date): string {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+function drawCutieFooter(
+  ctx: CanvasRenderingContext2D,
+  layout: Layout,
+  frame: FrameStyle,
+  caption: string,
+  showDate: boolean,
+  area: Layout["captionArea"],
+): void {
+  const title = caption.trim() || "Best Friends Forever";
+  const titleSize = Math.round(
+    Math.min(68, Math.max(40, layout.canvas.width * 0.082)),
+  );
+  const dateSize = Math.round(Math.max(13, titleSize * 0.3));
+  const titleY = Math.min(area.y + titleSize * 0.45, layout.canvas.height - dateSize * 3.2);
+  ctx.save();
+  ctx.fillStyle = frame.captionColor;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `${titleSize}px "Great Vibes", cursive`;
+  ctx.fillText(title, layout.canvas.width / 2, titleY, area.w - 80);
+  if (showDate) {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const stamp = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}   ·   PHOTOBOOTH MEMORY`;
+    ctx.fillStyle = "#F4A4C0";
+    ctx.font = `600 ${dateSize}px Poppins, sans-serif`;
+    ctx.letterSpacing = "0.08em";
+    ctx.fillText(stamp, layout.canvas.width / 2, titleY + titleSize * 0.72, area.w - 48);
+  }
+  ctx.restore();
 }

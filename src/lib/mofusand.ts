@@ -162,22 +162,12 @@ function softBorder(
 }
 
 function brand(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  color: string,
-  label: string,
-  y = 42,
-): void {
-  ctx.save();
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.88;
-  ctx.font = `700 ${Math.max(14, Math.round(w * 0.034))}px Poppins, "Segoe UI", sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.letterSpacing = "0.04em";
-  ctx.fillText(label, w / 2, y);
-  ctx.restore();
-}
+  _ctx: CanvasRenderingContext2D,
+  _w: number,
+  _color: string,
+  _label: string,
+  _y = 42,
+): void {}
 
 function ginghamBand(
   ctx: CanvasRenderingContext2D,

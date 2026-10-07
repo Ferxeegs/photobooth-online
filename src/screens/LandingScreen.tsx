@@ -275,13 +275,14 @@ export function LandingScreen() {
             Pilih vibe-mu ✨
           </h2>
           <p className="mt-1 text-center text-sm text-ink-soft sm:text-left">
-            {frames.length} bingkai: lucu, kucing, romantis, sampai yang edgy.
+            {frames.length} bingkai: lucu, hello kitty, romantis, sampai yang edgy.
           </p>
 
-          <div className="mt-5 flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible">
+          <div className="mt-5 flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:grid sm:grid-cols-5 sm:gap-4 sm:overflow-visible">
             {[
               { label: "Lucu", blurb: "Bear & candy", from: "#E9D5FF", to: "#F5F3FF", mark: "🧸" },
               { label: "Kucing", blurb: "Meow mode", from: "#FBCFE8", to: "#FFF7ED", mark: "🐱" },
+              { label: "Hello Kitty", blurb: "Bow & hearts", from: "#FBCFE8", to: "#FFF5F8", mark: "🎀" },
               { label: "Romantis", blurb: "Date night", from: "#FCE7F3", to: "#FDF2F8", mark: "💕" },
               { label: "Keren", blurb: "Neon vibes", from: "#1E1B4B", to: "#4C1D95", mark: "😎", dark: true },
             ].map((theme, i) => (

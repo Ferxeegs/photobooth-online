@@ -57,7 +57,7 @@ export function CollagePreview({
   const stickerKey = stickers
     .map(
       (item) =>
-        `${item.id}:${item.x}:${item.y}:${item.scale}:${item.rotation}:${item.emoji}:${item.mofusandId ?? ""}`,
+        `${item.id}:${item.x}:${item.y}:${item.scale}:${item.rotation}:${item.emoji}:${item.mofusandId ?? ""}:${item.kittyId ?? ""}`,
     )
     .join("|");
 
@@ -248,11 +248,14 @@ function StickerHitTarget({
           28,
           (STICKER_BASE_SIZE *
             sticker.scale *
-            (sticker.mofusandId ? 1.35 : 1) *
+            (sticker.mofusandId || sticker.kittyId ? 1.35 : 1) *
             wrapWidth) /
             canvasWidth,
         )
-      : Math.max(28, STICKER_BASE_SIZE * sticker.scale * (sticker.mofusandId ? 1.35 : 1));
+      : Math.max(
+          28,
+          STICKER_BASE_SIZE * sticker.scale * (sticker.mofusandId || sticker.kittyId ? 1.35 : 1),
+        );
 
   useEffect(() => {
     const node = nodeRef.current;
@@ -323,7 +326,7 @@ function StickerHitTarget({
     <button
       ref={nodeRef}
       type="button"
-      aria-label={`Stiker ${sticker.mofusandId ? `Mofusand ${sticker.mofusandId}` : sticker.emoji}${selected ? ", terpilih" : ""}`}
+      aria-label={`Stiker ${sticker.kittyId ? `Kitty ${sticker.kittyId}` : sticker.mofusandId ? `Mofusand ${sticker.mofusandId}` : sticker.emoji}${selected ? ", terpilih" : ""}`}
       aria-pressed={selected}
       className="absolute z-10 rounded-full border-0 bg-transparent p-0"
       style={{

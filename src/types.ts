@@ -1,4 +1,4 @@
-export type ThemeId = "cute" | "romantic" | "cool" | "cat" | "mofusand";
+export type ThemeId = "cute" | "romantic" | "cool" | "cat" | "mofusand" | "kitty";
 export type CaptureMode = "auto" | "manual";
 export type FacingMode = "user" | "environment";
 export type PhotoSource = "camera" | "upload";
@@ -10,7 +10,13 @@ export type FilterId =
   | "sepia"
   | "pastel"
   | "vintage"
-  | "glow";
+  | "glow"
+  | "blush"
+  | "peach"
+  | "mint"
+  | "ice"
+  | "lilac"
+  | "vivid";
 export type Step =
   | "landing"
   | "permission"
@@ -60,10 +66,12 @@ export interface Photo {
 
 export interface PlacedSticker {
   id: string;
-  /** Emoji glyph; empty when using a Mofusand image sticker */
+  /** Emoji glyph; empty when using an image sticker */
   emoji: string;
   /** 1..11 — draws keyed PNG from /frames/mofusand */
   mofusandId?: number;
+  /** 1..8 — draws keyed PNG from /frames/kitty */
+  kittyId?: number;
   x: number;
   y: number;
   scale: number;
@@ -112,4 +120,11 @@ export type DecorationKind =
   | "mofusand-berry"
   | "mofusand-cafe"
   | "mofusand-friends"
-  | "mofusand-mix";
+  | "mofusand-mix"
+  | "kitty-hello"
+  | "kitty-bow"
+  | "kitty-berry"
+  | "kitty-sweet"
+  | "kitty-balloon"
+  | "kitty-mix"
+  | "kitty-cutie";

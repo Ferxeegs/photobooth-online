@@ -1,11 +1,13 @@
 import { CollagePreview } from "@/components/CollagePreview";
 import { CuteMascot } from "@/components/CuteMascot";
+import { KittyThumb } from "@/components/KittyThumb";
 import { MofusandThumb } from "@/components/MofusandThumb";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { filters, stickerCatalog } from "@/data/filters";
 import { track } from "@/lib/analytics";
+import { KITTY_STICKERS } from "@/lib/kitty";
 import { MOFUSAND_STICKERS } from "@/lib/mofusand";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
@@ -82,6 +84,20 @@ export function CustomizeScreen() {
     setSelectedStickerId(id);
   }
 
+  function placeKitty(kittyId: number): void {
+    const id = crypto.randomUUID();
+    addSticker({
+      id,
+      emoji: "",
+      kittyId,
+      x: 0.35 + Math.random() * 0.3,
+      y: 0.3 + Math.random() * 0.4,
+      scale: 1.2,
+      rotation: 0,
+    });
+    setSelectedStickerId(id);
+  }
+
   return (
     <Shell
       title="Kustomisasi & Hiaskan Foto"
@@ -117,7 +133,11 @@ export function CustomizeScreen() {
           <div className="space-y-3 rounded-3xl glass-card p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-xs font-bold text-purple-950">
-                {selected.mofusandId ? (
+                {selected.kittyId ? (
+                  <span className="grid size-8 place-items-center overflow-hidden rounded-lg bg-rose-50 ring-1 ring-pink-100">
+                    <KittyThumb id={selected.kittyId} size={64} className="size-full" />
+                  </span>
+                ) : selected.mofusandId ? (
                   <span className="grid size-8 place-items-center overflow-hidden rounded-lg bg-violet-50 ring-1 ring-purple-100">
                     <MofusandThumb id={selected.mofusandId} size={64} className="size-full" />
                   </span>
@@ -244,6 +264,28 @@ export function CustomizeScreen() {
                     onClick={() => placeMofusand(item.id)}
                   >
                     <MofusandThumb id={item.id} size={112} className="size-full" />
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-purple-950">Hello Kitty</p>
+              <p className="mt-0.5 text-[11px] font-medium text-purple-800/55">
+                Ketuk karakter untuk menempel di foto
+              </p>
+              <div className="mt-3 grid grid-cols-4 gap-2.5 sm:grid-cols-6">
+                {KITTY_STICKERS.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileTap={{ scale: 0.92 }}
+                    type="button"
+                    aria-label={`Tempel Hello Kitty ${item.id}`}
+                    className="grid aspect-square place-items-center overflow-hidden rounded-2xl border border-pink-100 bg-rose-50 p-1.5 shadow-xs hover:border-pink-300 hover:bg-white hover:ring-2 hover:ring-pink-200"
+                    onClick={() => placeKitty(item.id)}
+                  >
+                    <KittyThumb id={item.id} size={112} className="size-full" />
                   </motion.button>
                 ))}
               </div>
