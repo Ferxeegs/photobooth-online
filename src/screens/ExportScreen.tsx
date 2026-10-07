@@ -108,14 +108,14 @@ export function ExportScreen() {
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: "Snapie Photobooth",
-          text: "Hasil foto strip Snapie photobooth online!",
+          title: "Snapie",
+          text: "Foto strip dari Snapie",
         });
         track("export_success", { format: session.exportFormat, share: true });
         return;
       }
       if (canShare) {
-        await navigator.share({ title: "Snapie Photobooth", text: "Hasil foto strip Snapie online!" });
+        await navigator.share({ title: "Snapie", text: "Foto strip dari Snapie" });
         return;
       }
       setError("Berbagi tidak didukung browser ini. Unduh saja lalu kirim via galeri HP.");
@@ -138,7 +138,7 @@ export function ExportScreen() {
       <div className="flex flex-col gap-4">
         {/* Mascot Banner */}
         <div className="rounded-3xl glass-card p-4">
-          <CuteMascot expression="excited" speech="YAY! Hasil foto strip kamu super gemoy! 🎉" />
+          <CuteMascot expression="excited" speech="Jadi deh. Simpan foto ini ya 🎉" />
         </div>
 
         {/* Final Collage Preview */}

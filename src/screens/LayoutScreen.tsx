@@ -35,7 +35,7 @@ export function LayoutScreen() {
       <div className="flex flex-col gap-4">
         {/* Mascot Banner */}
         <div className="flex items-center justify-between rounded-3xl glass-card p-4">
-          <CuteMascot expression="happy" speech={`Layout ${selected.name} dipilih! (${selected.photoCount} foto)`} />
+          <CuteMascot expression="happy" speech={`Layout ${selected.name} — ${selected.photoCount} foto`} />
         </div>
 
         {/* Layout Grid */}

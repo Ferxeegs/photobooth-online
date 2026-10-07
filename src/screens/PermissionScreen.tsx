@@ -46,7 +46,7 @@ export function PermissionScreen() {
   return (
     <Shell
       title="Izin Kamera"
-      subtitle="Foto diproses lokal di HP-mu tanpa diunggah"
+      subtitle="Foto tetap di HP ini"
       progress={15}
       onBack={() => setStep("landing")}
     >
@@ -69,9 +69,9 @@ export function PermissionScreen() {
           <div className="flex items-center gap-4">
             <CuteMascot expression="camera" />
             <div>
-              <h2 className="font-display text-2xl font-bold text-purple-950">Siapkan Kamera</h2>
+              <h2 className="font-display text-2xl font-bold text-purple-950">Izinkan kamera</h2>
               <p className="mt-1 text-xs text-purple-900/70">
-                Izinkan akses kamera untuk memulai foto strip otomatis.
+                Izinkan kamera, lalu kita mulai sesi fotomu.
               </p>
             </div>
           </div>

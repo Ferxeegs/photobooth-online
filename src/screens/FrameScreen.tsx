@@ -57,8 +57,8 @@ export function FrameScreen() {
             expression="excited"
             speech={
               current.id === "no-frame"
-                ? "Tanpa bingkai — bersih dan fokusus ke fotomu!"
-                : `Bingkai ${current.name} pas banget!`
+                ? "Tanpa bingkai — bersih, fokus ke wajahmu"
+                : `Bingkai ${current.name} manis buat kamu`
             }
           />
         </div>

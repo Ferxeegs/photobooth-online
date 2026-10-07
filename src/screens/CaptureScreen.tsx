@@ -290,7 +290,7 @@ export function CaptureScreen() {
 
   return (
     <Shell
-      title={retakeIndex !== null ? "Ulangi Jepretan" : "Sesi Photobooth"}
+      title={retakeIndex !== null ? "Ulangi Jepretan" : "Sesi Foto"}
       subtitle={`Foto ke-${currentSlot} dari ${needed} · 4:3 Ratio`}
       progress={45}
       wide
@@ -386,10 +386,10 @@ export function CaptureScreen() {
               expression={busy ? "excited" : "happy"}
               speech={
                 busy
-                  ? "Tahan pose! Mengambil foto... 📸"
+                  ? "Tahan pose! 📸"
                   : retakeIndex !== null
-                  ? "Ulangi foto ini ya!"
-                  : `Foto ke-${currentSlot} siap dijepret!`
+                  ? "Ulangi yang ini ya"
+                  : "Foto ke-" + currentSlot + " dari " + needed
               }
             />
           </div>

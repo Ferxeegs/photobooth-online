@@ -195,7 +195,7 @@ export function CustomizeScreen() {
         ) : null}
 
         <div className="rounded-3xl glass-card p-4">
-          <CuteMascot expression="love" speech="Hias foto kamu sesuka hati! ✨" />
+          <CuteMascot expression="love" speech="Hias fotomu — stiker dan warna sesukamu ✨" />
         </div>
 
         <div className="flex gap-2">
@@ -324,7 +324,7 @@ export function CustomizeScreen() {
               <input
                 value={caption}
                 maxLength={48}
-                placeholder="mis. Date Night 💕 / Wisuda 2026 🎓 / Photobooth Gemoy"
+                placeholder="mis. Sayangku 💕 / hari ini"
                 onChange={(event) => setCaption(event.target.value)}
                 className="mt-1.5 w-full rounded-2xl border border-purple-200 bg-white/90 px-4 py-3 text-sm font-medium text-purple-950 shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-400"
               />

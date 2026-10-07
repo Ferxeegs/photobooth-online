@@ -39,7 +39,7 @@ export function ReviewScreen() {
       <div className="flex flex-col gap-4">
         {/* Mascot Header */}
         <div className="rounded-3xl glass-card p-4">
-          <CuteMascot expression="love" speech="Foto-fotomu manis banget! Atur posisinya ya ✨" />
+          <CuteMascot expression="love" speech="Cantik. Geser atau zoom kalau mau lebih pas ✨" />
         </div>
 
         {/* Photo Grid */}

@@ -10,7 +10,7 @@ export function PrivacyScreen() {
     <Shell title="Jaminan Privasi 100%" onBack={() => setStep("landing")}>
       <div className="flex flex-col gap-4 py-2">
         <div className="rounded-3xl glass-card p-4">
-          <CuteMascot expression="happy" speech="Fotomu 100% aman di HP-mu sendiri! ✨" />
+          <CuteMascot expression="happy" speech="Tenang. Fotomu cuma ada di HP ini ✨" />
         </div>
 
         <article className="space-y-4 rounded-3xl glass-card p-6 text-xs leading-relaxed text-purple-900/80 shadow-md">

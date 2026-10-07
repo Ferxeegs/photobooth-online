@@ -1,7 +1,6 @@
 import { CuteMascot } from "@/components/CuteMascot";
 import { Button } from "@/components/ui/Button";
 import { frames } from "@/data/frames";
-import { layouts } from "@/data/layouts";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/store/session";
 import { motion } from "framer-motion";
@@ -82,12 +81,11 @@ export function LandingScreen() {
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-5 pb-10 pt-5 sm:px-8 sm:pt-6">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-500 text-sm shadow-md">
-              📸
-            </span>
-            <p className="font-display text-xl font-extrabold tracking-tight text-heart">
-              Snapie
-            </p>
+            <img
+              src="/logo_snapie.webp"
+              alt="Snapie"
+              className="h-12 w-auto sm:h-14"
+            />
           </div>
           <button
             type="button"
@@ -108,26 +106,18 @@ export function LandingScreen() {
             >
               <CuteMascot
                 expression="excited"
-                speech="Yuk bikin foto strip gemoy bareng! ✨"
+                speech="Siap jepret yang lucu hari ini? ✨"
               />
             </motion.div>
 
-            <motion.p
+            <motion.img
+              src="/logo_snapie.webp"
+              alt="Snapie"
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.05 }}
-              className="mt-5 font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
-            >
-              <span className="text-heart">Snap</span>
-              <span className="text-gradient-purple">ie</span>
-              <motion.span
-                className="ml-1 inline-block"
-                animate={{ rotate: [0, 14, -8, 0], y: [0, -4, 0] }}
-                transition={{ duration: 2.8, repeat: Infinity }}
-              >
-                💕
-              </motion.span>
-            </motion.p>
+              className="mx-auto mt-5 h-44 w-auto sm:h-52 lg:mx-0 lg:h-64"
+            />
 
             <motion.h1
               initial={{ opacity: 0, y: 12 }}
@@ -135,8 +125,8 @@ export function LandingScreen() {
               transition={{ delay: 0.08 }}
               className="mt-4 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl"
             >
-              Jepret. Bingkai.{" "}
-              <span className="text-gradient-purple">Gemoyin.</span>
+              Khusus buat{" "}
+              <span className="text-gradient-purple">Putri.</span>
             </motion.h1>
 
             <motion.p
@@ -145,8 +135,8 @@ export function LandingScreen() {
               transition={{ delay: 0.12 }}
               className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-soft sm:text-base lg:mx-0"
             >
-              Photobooth online yang lucu & estetik. Tanpa aplikasi, tanpa akun —
-              fotomu aman di HP-mu sendiri.
+              Snapie ini untuk Putri Firyal Rahmania. Jepret senyummu, hias
+              fotomu, lalu simpan momen yang cuma milik kamu.
             </motion.p>
 
             <motion.div
@@ -160,7 +150,7 @@ export function LandingScreen() {
                 icon={<Camera size={20} />}
                 onClick={start}
               >
-                Mulai Foto Yuk ✨
+                Mulai Foto ✨
               </Button>
               <p className="flex items-center gap-1.5 text-xs font-medium text-ink-soft">
                 <ShieldCheck size={14} className="text-emerald-500" />
@@ -218,7 +208,7 @@ export function LandingScreen() {
             Gampang banget! 🎉
           </h2>
           <p className="mt-1 text-center text-sm text-ink-soft sm:text-left">
-            Dari buka kamera sampai unduh, biasanya di bawah 2 menit.
+            Tiga langkah, selesai.
           </p>
 
           <ol className="mt-6 grid gap-4 sm:grid-cols-3 sm:gap-5">
@@ -227,21 +217,21 @@ export function LandingScreen() {
                 n: "1",
                 emoji: "🖼️",
                 title: "Pilih layout",
-                body: "Strip, grid, atau polaroid — sesuaikan mood.",
+                body: "Strip, grid, atau polaroid — pilih yang paling kamu suka.",
                 tint: "from-violet-100 to-purple-50",
               },
               {
                 n: "2",
                 emoji: "📸",
                 title: "Jepret & hias",
-                body: "Countdown lucu, filter, stiker, bingkai kucing!",
+                body: "Countdown, filter, stiker Hello Kitty, bingkai manis.",
                 tint: "from-pink-100 to-rose-50",
               },
               {
                 n: "3",
                 emoji: "💾",
                 title: "Unduh & bagikan",
-                body: "PNG/JPG tajam, siap dipamerin ke story.",
+                body: "PNG/JPG tajam, siap kamu simpan atau bagikan.",
                 tint: "from-amber-50 to-orange-50",
               },
             ].map((step, i) => (
@@ -275,7 +265,7 @@ export function LandingScreen() {
             Pilih vibe-mu ✨
           </h2>
           <p className="mt-1 text-center text-sm text-ink-soft sm:text-left">
-            {frames.length} bingkai: lucu, hello kitty, romantis, sampai yang edgy.
+            {frames.length} bingkai: hello kitty, romantis, sampai yang edgy.
           </p>
 
           <div className="mt-5 flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:grid sm:grid-cols-5 sm:gap-4 sm:overflow-visible">
@@ -344,10 +334,10 @@ export function LandingScreen() {
           </motion.span>
 
           <p className="font-display text-2xl font-extrabold sm:text-3xl">
-            Siap jadi bintang photobooth?
+            Siap jepret?
           </p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-white/90">
-            {layouts.length} layout · {frames.length} bingkai · hasil HD siap share
+            Langsung dari browser, tanpa aplikasi.
           </p>
           <Button
             variant="secondary"
@@ -355,7 +345,7 @@ export function LandingScreen() {
             icon={<Camera size={18} />}
             onClick={start}
           >
-            Mulai Foto Sekarang
+            Mulai sekarang
           </Button>
         </section>
 
