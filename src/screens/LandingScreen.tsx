@@ -361,7 +361,7 @@ export function LandingScreen() {
         <footer className="mt-8 space-y-1.5 pb-2 text-center text-xs text-ink-soft">
           <p>🛡️ Fotomu tidak diunggah. Diproses 100% di browser.</p>
           <p className="flex items-center justify-center gap-1">
-            © 2026 Ferxcode | Made by
+            © 2026 Ferxcode | Made with
             <Heart size={12} className="fill-rose-500 text-rose-500" aria-label="love" />
             for Putri Firyal Rahmania
           </p>

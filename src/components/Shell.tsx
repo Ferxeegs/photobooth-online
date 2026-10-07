@@ -112,7 +112,7 @@ export function Shell({
             footer ? "mt-2" : ""
           } ${dark ? "text-purple-300/70" : "text-purple-800/50"}`}
         >
-          © 2026 Ferxcode | Made by
+          © 2026 Ferxcode | Made with
           <Heart
             size={12}
             className="fill-rose-500 text-rose-500"
